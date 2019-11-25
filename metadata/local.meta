@@ -1,0 +1,28 @@
+[app/ui]
+version = 8.0.0
+modtime = 1574234290.397922000
+
+[app/launcher]
+version = 8.0.0
+modtime = 1574234290.398708000
+
+[inputs/racing-telemetry%3A%2F%2Fforza]
+version = 8.0.0
+modtime = 1574581700.908995000
+
+[views/forza_realtime]
+owner = brett
+version = 8.0.0
+modtime = 1574367227.722508000
+
+[views/sessions]
+owner = brett
+version = 8.0.0
+modtime = 1574367161.334559000
+
+[macros/telemetry-index]
+access = read : [ * ], write : [ admin, power ]
+export = none
+owner = brett
+version = 8.0.0
+modtime = 1574364780.569169000
