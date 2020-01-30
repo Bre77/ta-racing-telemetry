@@ -31,15 +31,10 @@
       </input>
       <table>
         <search>
-          <query>| mstats earliest(CarOrdinal) as CarOrdinal avg(Speed) as Speed WHERE `telemetry-index` span=1s 
-| where CarOrdinal!=0
-| transaction CarOrdinal maxspan=5m maxpause=1h
-| stats avg(Speed) as "AvgSpeed" by _time duration CarOrdinal
-| eval AvgSpeed = AvgSpeed*$speed$
-| eval end = _time+duration
-| eval duration = duration/60
-| lookup Forza-CarOrdinal.csv CarOrdinal OUTPUT Manufacturer Model
-| fields - CarOrdinal
+          <query>| mstats avg(car.Speed) as Speed WHERE `telemetry-index` "state.Game"!=Menu by meta.SessionStart car.Name car.Class car.DriveTrain span=1s 
+| stats earliest(_time) as earliest latest(_time) as latest avg(Speed) as AvgSpeed by meta.SessionStart car.Name car.Class car.DriveTrain
+| eval duration = (latest-earliest)/60, duration=`reltime(duration)`, AvgSpeed = AvgSpeed*$speed$, _time=latest
+| reltime
 | sort -_time</query>
           <earliest>$sessiontime.earliest$</earliest>
           <latest>$sessiontime.latest$</latest>
@@ -63,8 +58,8 @@
           <option name="useThousandSeparators">false</option>
         </format>
         <drilldown>
-          <set token="time.earliest">$row._time$</set>
-          <set token="time.latest">$row.end$</set>
+          <set token="time.earliest">$row.earliest$</set>
+          <set token="time.latest">$row.latest$</set>
           <set token="session">true</set>
         </drilldown>
       </table>
@@ -75,7 +70,7 @@
       <table>
         <title>Lap Drilldown</title>
         <search>
-          <query>| mstats latest(LapNumber) as lap WHERE `telemetry-index` span=1s
+          <query>| mstats latest(car.LapNumber) as lap WHERE `telemetry-index` span=1s
 | transaction lap
 | table _time duration lap 
 | where lap!=0
@@ -84,6 +79,7 @@
           <latest>$time.latest$</latest>
         </search>
         <option name="drilldown">row</option>
+        <option name="refresh.display">progressbar</option>
         <drilldown>
           <set token="time.earliest">$row._time$</set>
           <set token="time.latest">$row.end$</set>

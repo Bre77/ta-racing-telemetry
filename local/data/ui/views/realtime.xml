@@ -1,5 +1,5 @@
 <form theme="dark">
-  <label>Forza Realtime</label>
+  <label>Realtime</label>
   <search>
     <query>| mstats latest(PositionX) as lat latest(PositionY) as lon WHERE `telemetry-index`
             | eval lat=lat/100

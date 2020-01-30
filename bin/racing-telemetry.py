@@ -10,6 +10,8 @@ import logging
 import re
 import traceback
 
+from forza_cars import forza_cars
+
 #set up logging suitable for splunkd comsumption
 logging.root
 logging.root.setLevel(logging.DEBUG)
@@ -53,6 +55,13 @@ SCHEME = """<scheme>
                 <data_type>boolean</data_type>
             </arg>
 
+            <arg name="filtermenu">
+                <title>Filter Menu</title>
+                <description>Filters out data sent while in menu</description>
+                <required_on_create>true</required_on_create>
+                <data_type>boolean</data_type>
+            </arg>
+
             <arg name="whitelist">
                 <title>Telemetry Whitelist</title>
                 <description>Regex to filter metrics</description>
@@ -64,13 +73,17 @@ SCHEME = """<scheme>
 </scheme>
 """
 
+
+
+#https://docs.google.com/spreadsheets/d/1bw6EAud8uDcZvSfvVv1bh1-dhiB5j6X6kyI31rHliIQ/edit?usp=sharing
+
 pcars2_header = ["meta.PacketNumber","meta.CategoryPacketNumber","meta.PartialPacketIndex","meta.PartialPacketNumber","meta.PacketType","meta.PacketVersion"]
 pcars2_weather = ["weather.Temperature.Ambient","weather.Temperature.Track","weather.RainDensity","weather.SnowDensity","weather.WindSpeed","weather.WindDirection.X","weather.WindDirection.Y"]
 f1_header = ["meta.PacketFormat","meta.Game.MajorVersion","meta.Game.MinorVersion","meta.packetVersion","meta.PacketNumber","meta.SessionUID","meta.SessionTime","meta.Frame","meta.PlayerIndex"]
 
 labels = {
-    "forza":         [None, "meta.Timestamp", "car.Rpm.Max", "car.Rpm.Idle", "car.Rpm.Current", "car.Acceleration.Local.X", "car.Acceleration.Local.Y", "car.Acceleration.Local.Z", "car.Velocity.Local.X", "car.Velocity.Local.Y", "car.Velocity.Local.Z", "car.Velocity.Angular.X", "car.Velocity.Angular.Y", "car.Velocity.Angular.Z", "car.Yaw", "car.Pitch", "car.Roll", "car.Suspension.NormalizedTravel.FrontLeft", "car.Suspension.NormalizedTravel.FrontRight", "car.Suspension.NormalizedTravel.RearLeft", "car.Suspension.NormalizedTravel.RearRight", "car.Tyre.SlipRatio.FrontLeft", "car.Tyre.SlipRatio.FrontRight", "car.Tyre.SlipRatio.RearLeft", "car.Tyre.SlipRatio.RearRight", "car.WheelRotationSpeed.FrontLeft", "car.WheelRotationSpeed.FrontRight", "car.WheelRotationSpeed.RearLeft", "car.WheelRotationSpeed.RearRight", "car.WheelOnRumbleStrip.FrontLeft", "car.WheelOnRumbleStrip.FrontRight", "car.WheelOnRumbleStrip.RearLeft", "car.WheelOnRumbleStrip.RearRight", "car.WheelInPuddleDepth.FrontLeft", "car.WheelInPuddleDepth.FrontRight", "car.WheelInPuddleDepth.RearLeft", "car.WheelInPuddleDepth.RearRight", "car.SurfaceRumble.FrontLeft", "car.SurfaceRumble.FrontRight", "car.SurfaceRumble.RearLeft", "car.SurfaceRumble.RearRight", "car.Tyre.SlipAngle.FrontLeft", "car.Tyre.SlipAngle.FrontRight", "car.Tyre.SlipAngle.RearLeft", "car.Tyre.SlipAngle.RearRight", "car.Tyre.CombinedSlip.FrontLeft", "car.Tyre.CombinedSlip.FrontRight", "car.Tyre.CombinedSlip.RearLeft", "car.Tyre.CombinedSlip.RearRight", "car.Suspension.Travel.FrontLeft", "car.SuspensionTravel.FrontRight", "car.Suspension.Travel.RearLeft", "car.Suspension.Travel.RearRight", "car.CarOrdinal", "car.CarClass", "car.CarPerformanceIndex", "car.DrivetrainType", "car.NumCylinders", "car.Position.X", "car.Position.Y", "car.Position.Z", "car.Speed", "car.Power", "car.Torque", "car.Tyre.Temp.FrontLeft", "car.Tyre.Temp.FrontRight", "car.Tyre.Temp.RearLeft", "car.Tyre.Temp.RearRight", "car.Boost", "car.Fuel.Level", "car.DistanceTraveled", "car.BestLap", "car.LastLap", "car.CurrentLap", "car.CurrentRaceTime", "car.LapNumber", "car.RacePosition", "car.Throttle", "car.Brake", "car.Clutch", "car.HandBrake", "car.Gear", "car.Steer", "car.NormalizedDrivingLine", "car.NormalizedAIBrakeDifference"],
-    "pcars1":        ["meta.BuildVersionNumber","meta.PacketType", None, "meta.PlayerIndex","meta.NumParticipants","car.Throttle.Unfiltered","car.Brake.Unfiltered","car.Steering.Unfiltered","car.Clutch.Unfiltered","car.RaceStateFlags","car.LapsInEvent","car.BestLapTime","car.LastLapTime","car.CurrentTime","car.SplitTimeAhead","car.SplitTimeBehind","car.SplitTime","car.EventTimeRemaining","car.FastestLapTime.Personal","car.FastestLapTime.World","car.CurrentSectorTime.1","car.CurrentSectorTime.2","car.CurrentSector3Time","track.FastestSectorTime.Current.1","track.FastestSectorTime.Current.2","track.FastestSectorTime.Current.3","track.FastestSectorTime.Personal.1","track.FastestSectorTime.Personal.2","track.FastestSectorTime.Personal.3","track.FastestSectorTime.World.1","track.FastestSectorTime.World.2","track.FastestSectorTime.World.3","car.JoyPad","car.HighestFlag","car.PitModeSchedule","car.Oil.Temp","car.Oil.Pressure","car.Water.Temp","car.Water.Pressure","car.Fuel.Pressure",None,"car.Fuel.Capacity","car.Brake","car.Throttle","car.Clutch","car.Steering","car.Fuel.Level","car.Speed","car.Rpm.Current","car.MaxRpm","car.GearNumGears","car.BoostAmount","car.EnforcedPitStopLap","car.CrashState","car.OdometerKM","car.Orientation.X","car.Orientation.Y","car.Orientation.Z","car.Velocity.Local.X","car.Velocity.Local.Y","car.Velocity.Local.Z","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.Velocity.Angular.X","car.Velocity.Angular.Y","car.Velocity.Angular.Z","car.Acceleration.Local.X","car.Acceleration.Local.Y","car.Acceleration.Local.Z","car.Acceleration.World.X","car.Acceleration.World.Y","car.Acceleration.World.Z","car.ExtentsCentre.X","car.ExtentsCentre.Y","car.ExtentsCentre.Z","car.Tyre.Flags.FrontLeft","car.Tyre.Flags.FrontRight","car.Tyre.Flags.RearLeft","car.Tyre.Flags.RearRight","car.Terrain.FrontLeft","car.Terrain.FrontRight","car.Terrain.RearLeft","car.Terrain.RearRight","car.Tyre.Y.FrontLeft","car.Tyre.Y.FrontRight","car.Tyre.Y.RearLeft","car.Tyre.Y.RearRight","car.Tyre.RPS.FrontLeft","car.Tyre.RPS.FrontRight","car.Tyre.RPS.RearLeft","car.Tyre.RPS.RearRight","car.Tyre.SlipSpeed.FrontLeft","car.Tyre.SlipSpeed.FrontRight","car.Tyre.SlipSpeed.RearLeft","car.Tyre.SlipSpeed.RearRight","car.Tyre.Temp.FrontLeft","car.Tyre.Temp.FrontRight","car.Tyre.Temp.RearLeft","car.Tyre.Temp.RearRight","car.Tyre.Grip.FrontLeft","car.Tyre.Grip.FrontRight","car.Tyre.Grip.RearLeft","car.Tyre.Grip.RearRight","car.Tyre.HeightAboveGround.FrontLeft","car.Tyre.HeightAboveGround.FrontRight","car.Tyre.HeightAboveGround.RearLeft","car.Tyre.HeightAboveGround.RearRight","car.Tyre.LateralStiffness.FrontLeft","car.Tyre.LateralStiffness.FrontRight","car.Tyre.LateralStiffness.RearLeft","car.Tyre.LateralStiffness.RearRight","car.Tyre.Wear.FrontLeft","car.Tyre.Wear.FrontRight","car.Tyre.Wear.RearLeft","car.Tyre.Wear.RearRight","car.Brake.Damage.FrontLeft","car.Brake.Damage.FrontRight","car.Brake.Damage.RearLeft","car.Brake.Damage.RearRight","car.Suspension.Damage.FrontLeft","car.Suspension.Damage.FrontRight","car.Suspension.Damage.RearLeft","car.Suspension.Damage.RearRight","car.Brake.Temp.FrontLeft","car.Brake.Temp.FrontRight","car.Brake.Temp.RearLeft","car.Brake.Temp.RearRight","car.Tyre.TreadTemp.FrontLeft","car.Tyre.TreadTemp.FrontRight","car.Tyre.TreadTemp.RearLeft","car.Tyre.TreadTemp.RearRight","car.Tyre.LayerTemp.FrontLeft","car.Tyre.LayerTemp.FrontRight","car.Tyre.LayerTemp.RearLeft","car.Tyre.LayerTemp.RearRight","car.Tyre.CarcassTemp.FrontLeft","car.Tyre.CarcassTemp.FrontRight","car.Tyre.CarcassTemp.RearLeft","car.Tyre.CarcassTemp.RearRight","car.Tyre.RimTemp.FrontLeft","car.Tyre.RimTemp.FrontRight","car.Tyre.RimTemp.RearLeft","car.Tyre.RimTemp.RearRight","car.Tyre.InternalAirTemp.FrontLeft","car.Tyre.InternalAirTemp.FrontRight","car.Tyre.InternalAirTemp.RearLeft","car.Tyre.InternalAirTemp.RearRight","car.WheelLocalPositionY.FrontLeft","car.WheelLocalPositionY.FrontRight","car.WheelLocalPositionY.RearLeft","car.WheelLocalPositionY.RearRight","car.RideHeight.FrontLeft","car.RideHeight.FrontRight","car.RideHeight.RearLeft","car.RideHeight.RearRight","car.SuspensionTravel.FrontLeft","car.SuspensionTravel.FrontRight","car.SuspensionTravel.RearLeft","car.SuspensionTravel.RearRight","car.SuspensionVelocity.FrontLeft","car.SuspensionVelocity.FrontRight","car.SuspensionVelocity.RearLeft","car.SuspensionVelocity.RearRight","car.AirPressure.FrontLeft","car.AirPressure.FrontRight","car.AirPressure.RearLeft","car.AirPressure.RearRight","car.Engine.Speed","car.Torque","car.AeroDamage","car.Engine.Damage","weather.AmbientTemperature","weather.TrackTemperature","weather.RainDensity","weather.WindSpeed","weather.WindDirection.X","weather.WindDirection.Y","race.TrackLength","car.Wings.1","car.Wings.2","car.DPad"],
+    "forza":         [None, "meta.Timestamp", "car.Rpm.Max", "car.Rpm.Idle", "car.Rpm.Current", "car.Acceleration.Local.X", "car.Acceleration.Local.Y", "car.Acceleration.Local.Z", "car.Velocity.Local.X", "car.Velocity.Local.Y", "car.Velocity.Local.Z", "car.Velocity.Angular.X", "car.Velocity.Angular.Y", "car.Velocity.Angular.Z", "car.Yaw", "car.Pitch", "car.Roll", "car.Suspension.NormalizedTravel.FrontLeft", "car.Suspension.NormalizedTravel.FrontRight", "car.Suspension.NormalizedTravel.RearLeft", "car.Suspension.NormalizedTravel.RearRight", "car.Tyre.SlipRatio.FrontLeft", "car.Tyre.SlipRatio.FrontRight", "car.Tyre.SlipRatio.RearLeft", "car.Tyre.SlipRatio.RearRight", "car.WheelRotationSpeed.FrontLeft", "car.WheelRotationSpeed.FrontRight", "car.WheelRotationSpeed.RearLeft", "car.WheelRotationSpeed.RearRight", "car.WheelOnRumbleStrip.FrontLeft", "car.WheelOnRumbleStrip.FrontRight", "car.WheelOnRumbleStrip.RearLeft", "car.WheelOnRumbleStrip.RearRight", "car.WheelInPuddleDepth.FrontLeft", "car.WheelInPuddleDepth.FrontRight", "car.WheelInPuddleDepth.RearLeft", "car.WheelInPuddleDepth.RearRight", "car.SurfaceRumble.FrontLeft", "car.SurfaceRumble.FrontRight", "car.SurfaceRumble.RearLeft", "car.SurfaceRumble.RearRight", "car.Tyre.SlipAngle.FrontLeft", "car.Tyre.SlipAngle.FrontRight", "car.Tyre.SlipAngle.RearLeft", "car.Tyre.SlipAngle.RearRight", "car.Tyre.CombinedSlip.FrontLeft", "car.Tyre.CombinedSlip.FrontRight", "car.Tyre.CombinedSlip.RearLeft", "car.Tyre.CombinedSlip.RearRight", "car.Suspension.Travel.FrontLeft", "car.SuspensionTravel.FrontRight", "car.Suspension.Travel.RearLeft", "car.Suspension.Travel.RearRight", None, None, "car.CarPerformanceIndex", None, "car.NumCylinders", "car.Position.X", "car.Position.Y", "car.Position.Z", "car.Speed", "car.Power", "car.Torque", "car.Tyre.Temp.FrontLeft", "car.Tyre.Temp.FrontRight", "car.Tyre.Temp.RearLeft", "car.Tyre.Temp.RearRight", "car.Boost", "car.Fuel.Level", "car.DistanceTraveled", "car.BestLap", "car.LastLap", "car.CurrentLap", "car.CurrentTime", "car.LapNumber", "car.RacePosition", "car.Throttle", "car.Brake", "car.Clutch", "car.HandBrake", "car.Gear", "car.Steer", "car.NormalizedDrivingLine", "car.NormalizedAIBrakeDifference"],
+    "pcars1":        ["meta.BuildVersionNumber","meta.PacketType", None, "meta.PlayerIndex","meta.NumParticipants","car.Throttle.Unfiltered","car.Brake.Unfiltered","car.Steering.Unfiltered","car.Clutch.Unfiltered","car.RaceStateFlags","car.LapsInEvent","car.BestLap","car.LastLap","car.CurrentTime","car.SplitTimeAhead","car.SplitTimeBehind","car.SplitTime","car.EventTimeRemaining","car.FastestLapTime.Personal","car.FastestLapTime.World","car.CurrentSectorTime.1","car.CurrentSectorTime.2","car.CurrentSectorTime.3","track.FastestSectorTime.Current.1","track.FastestSectorTime.Current.2","track.FastestSectorTime.Current.3","track.FastestSectorTime.Personal.1","track.FastestSectorTime.Personal.2","track.FastestSectorTime.Personal.3","track.FastestSectorTime.World.1","track.FastestSectorTime.World.2","track.FastestSectorTime.World.3","car.JoyPad","car.HighestFlag","car.PitModeSchedule","car.Oil.Temp","car.Oil.Pressure","car.Water.Temp","car.Water.Pressure","car.Fuel.Pressure",None,"car.Fuel.Capacity","car.Brake","car.Throttle","car.Clutch","car.Steering","car.Fuel.Level","car.Speed","car.Rpm.Current","car.Rpm.Max","car.Gear.NumGears","car.Boost","car.EnforcedPitStopLap","car.CrashState","car.Odometer","car.Orientation.X","car.Orientation.Y","car.Orientation.Z","car.Velocity.Local.X","car.Velocity.Local.Y","car.Velocity.Local.Z","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.Velocity.Angular.X","car.Velocity.Angular.Y","car.Velocity.Angular.Z","car.Acceleration.Local.X","car.Acceleration.Local.Y","car.Acceleration.Local.Z","car.Acceleration.World.X","car.Acceleration.World.Y","car.Acceleration.World.Z","car.ExtentsCentre.X","car.ExtentsCentre.Y","car.ExtentsCentre.Z","car.Tyre.Flags.FrontLeft","car.Tyre.Flags.FrontRight","car.Tyre.Flags.RearLeft","car.Tyre.Flags.RearRight","car.Terrain.FrontLeft","car.Terrain.FrontRight","car.Terrain.RearLeft","car.Terrain.RearRight","car.Tyre.Y.FrontLeft","car.Tyre.Y.FrontRight","car.Tyre.Y.RearLeft","car.Tyre.Y.RearRight","car.Tyre.RPS.FrontLeft","car.Tyre.RPS.FrontRight","car.Tyre.RPS.RearLeft","car.Tyre.RPS.RearRight","car.Tyre.SlipSpeed.FrontLeft","car.Tyre.SlipSpeed.FrontRight","car.Tyre.SlipSpeed.RearLeft","car.Tyre.SlipSpeed.RearRight","car.Tyre.Temp.FrontLeft","car.Tyre.Temp.FrontRight","car.Tyre.Temp.RearLeft","car.Tyre.Temp.RearRight","car.Tyre.Grip.FrontLeft","car.Tyre.Grip.FrontRight","car.Tyre.Grip.RearLeft","car.Tyre.Grip.RearRight","car.Tyre.HeightAboveGround.FrontLeft","car.Tyre.HeightAboveGround.FrontRight","car.Tyre.HeightAboveGround.RearLeft","car.Tyre.HeightAboveGround.RearRight","car.Tyre.LateralStiffness.FrontLeft","car.Tyre.LateralStiffness.FrontRight","car.Tyre.LateralStiffness.RearLeft","car.Tyre.LateralStiffness.RearRight","car.Tyre.Wear.FrontLeft","car.Tyre.Wear.FrontRight","car.Tyre.Wear.RearLeft","car.Tyre.Wear.RearRight","car.Brake.Damage.FrontLeft","car.Brake.Damage.FrontRight","car.Brake.Damage.RearLeft","car.Brake.Damage.RearRight","car.Suspension.Damage.FrontLeft","car.Suspension.Damage.FrontRight","car.Suspension.Damage.RearLeft","car.Suspension.Damage.RearRight","car.Brake.Temp.FrontLeft","car.Brake.Temp.FrontRight","car.Brake.Temp.RearLeft","car.Brake.Temp.RearRight","car.Tyre.TreadTemp.FrontLeft","car.Tyre.TreadTemp.FrontRight","car.Tyre.TreadTemp.RearLeft","car.Tyre.TreadTemp.RearRight","car.Tyre.LayerTemp.FrontLeft","car.Tyre.LayerTemp.FrontRight","car.Tyre.LayerTemp.RearLeft","car.Tyre.LayerTemp.RearRight","car.Tyre.CarcassTemp.FrontLeft","car.Tyre.CarcassTemp.FrontRight","car.Tyre.CarcassTemp.RearLeft","car.Tyre.CarcassTemp.RearRight","car.Tyre.RimTemp.FrontLeft","car.Tyre.RimTemp.FrontRight","car.Tyre.RimTemp.RearLeft","car.Tyre.RimTemp.RearRight","car.Tyre.InternalAirTemp.FrontLeft","car.Tyre.InternalAirTemp.FrontRight","car.Tyre.InternalAirTemp.RearLeft","car.Tyre.InternalAirTemp.RearRight","car.WheelLocalPositionY.FrontLeft","car.WheelLocalPositionY.FrontRight","car.WheelLocalPositionY.RearLeft","car.WheelLocalPositionY.RearRight","car.RideHeight.FrontLeft","car.RideHeight.FrontRight","car.RideHeight.RearLeft","car.RideHeight.RearRight","car.SuspensionTravel.FrontLeft","car.SuspensionTravel.FrontRight","car.SuspensionTravel.RearLeft","car.SuspensionTravel.RearRight","car.SuspensionVelocity.FrontLeft","car.SuspensionVelocity.FrontRight","car.SuspensionVelocity.RearLeft","car.SuspensionVelocity.RearRight","car.AirPressure.FrontLeft","car.AirPressure.FrontRight","car.AirPressure.RearLeft","car.AirPressure.RearRight","car.Engine.Speed","car.Torque","car.AeroDamage","car.Engine.Damage","weather.AmbientTemperature","weather.TrackTemperature","weather.RainDensity","weather.WindSpeed","weather.WindDirection.X","weather.WindDirection.Y","race.TrackLength","car.Wings.1","car.Wings.2","car.DPad"],
     "pcars2_tele":    pcars2_header + ["car.PlayerIndex","car.Throttle.Unfiltered","car.Brake.Unfiltered","car.Steering.Unfiltered","car.Clutch.Unfiltered",None,"car.Oil.Temp","car.Oil.Pressure","car.Water.Temp","car.Water.Pressure","car.Fuel.Pressure","car.Fuel.Capacity","car.Brake","car.Throttle","car.Clutch","car.Fuel.Level","car.Speed","car.Rpm.Current","car.Rpm.Max","car.Steering","car.Gear.NumGears","car.Boost","car.CrashState","car.Odometer","car.Orientation.X","car.Orientation.Y","car.Orientation.Z","car.Velocity.Local.X","car.Velocity.Local.Y","car.Velocity.Local.Z","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.Velocity.Angular.X","car.Velocity.Angular.Y","car.Velocity.Angular.Z","car.Acceleration.Local.X","car.Acceleration.Local.Y","car.Acceleration.Local.Z","car.Acceleration.World.X","car.Acceleration.World.Y","car.Acceleration.World.Z","car.ExtentsCentre.X","car.ExtentsCentre.Y","car.ExtentsCentre.Z","car.Tyre.Flags.FrontLeft","car.Tyre.Flags.FrontRight","car.Tyre.Flags.RearLeft","car.Tyre.Flags.RearRight","car.Terrain.FrontLeft","car.Terrain.FrontRight","car.Terrain.RearLeft","car.Terrain.RearRight","car.Tyre.Y.FrontLeft","car.Tyre.Y.FrontRight","car.Tyre.Y.RearLeft","car.Tyre.Y.RearRight","car.Tyre.RPS.FrontLeft","car.Tyre.RPS.FrontRight","car.Tyre.RPS.RearLeft","car.Tyre.RPS.RearRight","car.Tyre.Temp.FrontLeft","car.Tyre.Temp.FrontRight","car.Tyre.Temp.RearLeft","car.Tyre.Temp.RearRight","car.Tyre.HeightAboveGround.FrontLeft","car.Tyre.HeightAboveGround.FrontRight","car.Tyre.HeightAboveGround.RearLeft","car.Tyre.HeightAboveGround.RearRight","car.Tyre.Wear.FrontLeft","car.Tyre.Wear.FrontRight","car.Tyre.Wear.RearLeft","car.Tyre.Wear.RearRight","car.Brake.Damage.FrontLeft","car.Brake.Damage.FrontRight","car.Brake.Damage.RearLeft","car.Brake.Damage.RearRight","car.Suspension.Damage.FrontLeft","car.Suspension.Damage.FrontRight","car.Suspension.Damage.RearLeft","car.Suspension.Damage.RearRight","car.Brake.Temp.FrontLeft","car.Brake.Temp.FrontRight","car.Brake.Temp.RearLeft","car.Brake.Temp.RearRight","car.Tyre.TreadTemp.FrontLeft","car.Tyre.TreadTemp.FrontRight","car.Tyre.TreadTemp.RearLeft","car.Tyre.TreadTemp.RearRight","car.Tyre.LayerTemp.FrontLeft","car.Tyre.LayerTemp.FrontRight","car.Tyre.LayerTemp.RearLeft","car.Tyre.LayerTemp.RearRight","car.CarcassTemp.FrontLeft","car.CarcassTemp.FrontRight","car.CarcassTemp.RearLeft","car.CarcassTemp.RearRight","car.Tyre.RimTemp.FrontLeft","car.Tyre.RimTemp.FrontRight","car.Tyre.RimTemp.RearLeft","car.Tyre.RimTemp.RearRight","car.Tyre.InternalAirTemp.FrontLeft","car.Tyre.InternalAirTemp.FrontRight","car.Tyre.InternalAirTemp.RearLeft","car.Tyre.InternalAirTemp.RearRight","car.Tyre.TempLeft.FrontLeft","car.Tyre.TempLeft.FrontRight","car.Tyre.TempLeft.RearLeft","car.Tyre.TempLeft.RearRight","car.Tyre.TempCenter.FrontLeft","car.Tyre.TempCenter.FrontRight","car.Tyre.TempCenter.RearLeft","car.Tyre.TempCenter.RearRight","car.Tyre.TempRight.FrontLeft","car.Tyre.TempRight.FrontRight","car.Tyre.TempRight.RearLeft","car.Tyre.TempRight.RearRight","car.WheelLocalPositionY.FrontLeft","car.WheelLocalPositionY.FrontRight","car.WheelLocalPositionY.RearLeft","car.WheelLocalPositionY.RearRight","car.RideHeight.FrontLeft","car.RideHeight.FrontRight","car.RideHeight.RearLeft","car.RideHeight.RearRight","car.Suspension.Travel.FrontLeft","car.Suspension.Travel.FrontRight","car.Suspension.Travel.RearLeft","car.Suspension.Travel.RearRight","car.Suspension.Velocity.FrontLeft","car.Suspension.Velocity.FrontRight","car.Suspension.Velocity.RearLeft","car.Suspension.Velocity.RearRight","car.Suspension.RideHeight.FrontLeft","car.Suspension.RideHeight.FrontRight","car.Suspension.RideHeight.RearLeft","car.Suspension.RideHeight.RearRight","car.AirPressure.FrontLeft","car.AirPressure.FrontRight","car.AirPressure.RearLeft","car.AirPressure.RearRight","car.Engine.Speed","car.Torque","car.Wings.1","car.Wings.2","car.HandBrake","car.AeroDamage","car.Engine.Damage","car.JoyPad","car.DPad","car.TurboBoostPressure","car.Position.X","car.Position.Y","car.Position.Z","car.Brake.Bias","car.TickCount"],
     "pcars2_state":   pcars2_header + ["state.BuildVersionNumber",None] + pcars2_weather,
     "pcars2_weather": pcars2_header + pcars2_weather,
@@ -83,13 +96,11 @@ enums = {
     "pcars_state.Game": ["Exited","Main Menu","Playing","Paused","Menu","Restarting","Replay","Main Menu Replay"],
     "pcars_state.Session": ["Invalid","Practice","Test","Qualify","Formation Lap","Race","Time Attack"],
     "pcars_state.Race": ["Invalid","Not Started","Racing","Finished","Disqualified","Retired","DNF"],
-    "pcars_car.Terrain": ["ROAD","LOW GRIP ROAD","BUMPY ROAD1","BUMPY ROAD2","BUMPY ROAD3","MARBLES","GRASSY BERMS","GRASS","GRAVEL","BUMPY GRAVEL","RUMBLE STRIPS","DRAINS","TYREWALLS","CEMENTWALLS","GUARDRAILS","SAND","BUMPY SAND","DIRT","BUMPY DIRT","DIRT ROAD","BUMPY DIRT ROAD","PAVEMENT","DIRT BANK","WOOD","DRY VERGE","EXIT RUMBLE STRIPS","GRASSCRETE","LONG GRASS","SLOPE GRASS","COBBLES","SAND ROAD","BAKED CLAY","ASTROTURF","SNOWHALF","SNOWFULL"]
+    "pcars_car.Terrain": ["ROAD","LOW GRIP ROAD","BUMPY ROAD1","BUMPY ROAD2","BUMPY ROAD3","MARBLES","GRASSY BERMS","GRASS","GRAVEL","BUMPY GRAVEL","RUMBLE STRIPS","DRAINS","TYREWALLS","CEMENTWALLS","GUARDRAILS","SAND","BUMPY SAND","DIRT","BUMPY DIRT","DIRT ROAD","BUMPY DIRT ROAD","PAVEMENT","DIRT BANK","WOOD","DRY VERGE","EXIT RUMBLE STRIPS","GRASSCRETE","LONG GRASS","SLOPE GRASS","COBBLES","SAND ROAD","BAKED CLAY","ASTROTURF","SNOWHALF","SNOWFULL"],
+    "forza_car.DriveTrain": ["FWD","RWD","AWD"],
+    "forza_car.Class": ["D","C","B","A","S1","S2","S3","X"]
 }
 
-
-# Empty validation routine. This routine is optional.
-def validate_arguments(): 
-    pass
 
 def validate_conf(config, key):
     if key not in config:
@@ -152,6 +163,7 @@ def run_script():
     config=get_config()
 
     opt_multimetric=(config["multimetric"]=="True" or config["multimetric"]=="1")
+    opt_filtermenu=False #(config["filtermenu"]=="True" or config["filtermenu"]=="1")
     opt_ip=config["bindip"]
     opt_port=int(config["port"])
     opt_rate_limit=float(config["ratelimit"])/1000
@@ -182,6 +194,12 @@ def run_script():
     dimensions = {}
     limiter = {}
 
+    def list_get (l, idx, default):
+        try:
+            return l[idx]
+        except IndexError:
+            return default
+
     def ratelimit(time,i,host,limit):
         key = "{}:{}".format(i,host)
         if time >= limiter.get(key,0)+limit:
@@ -209,23 +227,48 @@ def run_script():
             if(size == 324): #Forza Horizon 4
                 #if whitelist["forza"] and now >= (limiter.get("324:"+host,0)+opt_rate_limit):
                 if whitelist["forza"] and ratelimit(now,"324",host,opt_rate_limit):
+                    values = struct.unpack('<i I 27f 4i 20f 5i 12x 17f H 6B 3b x',packet)
+                    if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
+
                     limiter["324:"+host] = now
                     source = "Forza Horizon 4"
                     label = "forza"
-                    values = struct.unpack('<i I 27f 4i 20f 5i 12x 17f H 6B 3b x',packet)
+
                     dimensions[host]['state.Game'] = enums["forza_state.Game"][values[0]]
+                    dimensions[host]['car.Name'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
+                    dimensions[host]['car.Class'] = list_get(enums["forza_car.Class"],values[54],values[54])
+                    dimensions[host]['car.DriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
+
+                    
+
             elif (size == 311): #Forza Motorsport 7 - Dash mode
                 if whitelist["forza"] and now >= (limiter.get("311:"+host,0)+opt_rate_limit):
+                    values = struct.unpack('<i I 27f 4i 20f 5i 17f H 6B 3b',packet)
+                    if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
+                    
                     limiter["311:"+host] = now
                     source = "Forza Motorsport 7"
                     label = "forza"
-                    values = struct.unpack('<i I 27f 4i 20f 5i 17f H 6B 3b',packet)
-            elif (size == 231): #Forza Motorsport 7 - Sled mode
-                if whitelist["forza"] and now >= (limiter.get("231:"+host,0)+opt_rate_limit):
-                    limiter["231:"+host] = now
+                    
+                    dimensions[host]['state.Game'] = enums["forza_state.Game"][values[0]]
+                    dimensions[host]['car.Name'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
+                    dimensions[host]['car.Class'] = list_get(enums["forza_car.Class"],values[54],values[54])
+                    dimensions[host]['car.DriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
+
+            elif (size == 232): #Forza Motorsport 7 - Sled mode
+                if whitelist["forza"] and now >= (limiter.get("232:"+host,0)+opt_rate_limit):
+                    values = struct.unpack('<i I 27f 4i 20f 5i',packet)
+                    if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
+                    
+                    limiter["232:"+host] = now
                     source = "Forza Motorsport 7"
                     label = "forza"
-                    values = struct.unpack('<i I 27f 4i 20f 5i',packet)
+                    
+                    dimensions[host]['state.Game'] = enums["forza_state.Game"][values[0]]
+                    dimensions[host]['car.Name'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
+                    dimensions[host]['car.Class'] = list_get(enums["forza_car.Class"],values[54],values[54])
+                    dimensions[host]['car.DriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
+
             elif (size == 559): #Project Cars 2 Patch 5 - Telemetry
                 if whitelist["pcars2_tele"] and now >= (limiter.get("559:"+host,0)+opt_rate_limit):
                     limiter["559:"+host] = now
@@ -237,7 +280,8 @@ def run_script():
                     idx = values[6]*2 # Move to correct offset
                     if idx<len(cns):
                         dimensions[host]["car.Name"] = str(format(cns[idx]))
-                    
+            elif (size == 1063): #Project Cars 2 Patch 5 - Timing Data
+                continue      
             elif (size == 24): #Project Cars 2 Patch 5 - Game State
                 if whitelist["pcars2_state"] and now >= (limiter.get("24:"+host,0)+opt_rate_limit):
                     limiter["24:"+host] = now
@@ -322,6 +366,7 @@ def run_script():
                     playerindex = packet[22]
                     values = struct.unpack("<H 4B QfIB {} 6f 6h 6f {} 30f".format(playerindex*"60x",(18-playerindex)*"60x"),packet) # Removes all other cars except the players
             else: #Unrecognised UDP packet length
+                logging.info("Unknown Packet Size '%s'" % size)
                 continue 
 
             if values:
@@ -352,7 +397,7 @@ if __name__ == '__main__':
         if sys.argv[1] == "--scheme":
             print(SCHEME)
         elif sys.argv[1] == "--validate-arguments":
-            validate_arguments()
+            pass
         else:
             pass
     else:

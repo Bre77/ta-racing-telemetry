@@ -7,22 +7,59 @@ version = 8.0.0
 modtime = 1574234290.398708000
 
 [inputs/racing-telemetry%3A%2F%2Fforza]
-version = 8.0.0
-modtime = 1574581700.908995000
+version = 8.0.1
+modtime = 1579926650.608257000
 
 [views/forza_realtime]
-owner = brett
-version = 8.0.0
-modtime = 1574367227.722508000
+export = none
+owner = admin
+version = 8.0.1
+modtime = 1579575348.960659000
 
 [views/sessions]
-owner = brett
-version = 8.0.0
-modtime = 1574367161.334559000
+export = none
+owner = admin
+version = 8.0.1
+modtime = 1580192114.815593000
 
 [macros/telemetry-index]
 access = read : [ * ], write : [ admin, power ]
 export = none
+owner = admin
+version = 8.0.1
+modtime = 1580187602.459189000
+
+[lookups/Forza-CarClass.csv]
+access = read : [ * ]
+export = none
 owner = brett
-version = 8.0.0
-modtime = 1574364780.569169000
+version = 8.0.1
+modtime = 1576280644.873369000
+
+[lookups/Forza-CarOrdinal.csv]
+access = read : [ * ]
+export = none
+owner = brett
+version = 8.0.1
+modtime = 1576280652.519631000
+
+[lookups/Forza-DrivetrainType.csv]
+access = read : [ * ]
+export = none
+owner = brett
+version = 8.0.1
+modtime = 1576280658.686244000
+
+[views/realtime]
+access = read : [ * ], write : [ admin, power ]
+export = none
+owner = admin
+version = 8.0.1
+modtime = 1579770942.288614000
+
+[macros/reltime%281%29]
+access = read : [ * ]
+export = none
+owner = admin
+version = 8.0.1
+modtime = 1580191885.462948000
