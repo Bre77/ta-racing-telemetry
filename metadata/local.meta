@@ -8,7 +8,7 @@ modtime = 1574234290.398708000
 
 [inputs/racing-telemetry%3A%2F%2Fforza]
 version = 8.0.1
-modtime = 1579926650.608257000
+modtime = 1580607103.762025000
 
 [views/forza_realtime]
 export = none
@@ -20,7 +20,7 @@ modtime = 1579575348.960659000
 export = none
 owner = admin
 version = 8.0.1
-modtime = 1580192114.815593000
+modtime = 1580451194.792221000
 
 [macros/telemetry-index]
 access = read : [ * ], write : [ admin, power ]
@@ -55,7 +55,7 @@ access = read : [ * ], write : [ admin, power ]
 export = none
 owner = admin
 version = 8.0.1
-modtime = 1579770942.288614000
+modtime = 1580450978.853907000
 
 [macros/reltime%281%29]
 access = read : [ * ]

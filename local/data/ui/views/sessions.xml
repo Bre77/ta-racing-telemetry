@@ -31,11 +31,12 @@
       </input>
       <table>
         <search>
-          <query>| mstats avg(car.Speed) as Speed WHERE `telemetry-index` "state.Game"!=Menu by meta.SessionStart car.Name car.Class car.DriveTrain span=1s 
-| stats earliest(_time) as earliest latest(_time) as latest avg(Speed) as AvgSpeed by meta.SessionStart car.Name car.Class car.DriveTrain
-| eval duration = (latest-earliest)/60, duration=`reltime(duration)`, AvgSpeed = AvgSpeed*$speed$, _time=latest
-| reltime
-| sort -_time</query>
+          <query>| mstats avg(car.Speed) as speed WHERE `telemetry-index` "GameState"!=Menu by CarName host source span=1s 
+| transaction CarName host source maxspan=60s maxpause=-1 
+| eval end = _time+duration+1, duration=`reltime(duration)` 
+| eventstats avg(speed) as AvgSpeed by _time host source 
+| eval AvgSpeed = AvgSpeed*$speed$ 
+| table _time end host source AvgSpeed CarName duration eventcount</query>
           <earliest>$sessiontime.earliest$</earliest>
           <latest>$sessiontime.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -58,9 +59,10 @@
           <option name="useThousandSeparators">false</option>
         </format>
         <drilldown>
-          <set token="time.earliest">$row.earliest$</set>
-          <set token="time.latest">$row.latest$</set>
-          <set token="session">true</set>
+          <set token="time.earliest">$row._time$</set>
+          <set token="time.latest">$row.end$</set>
+          <set token="host">$row.host$</set>
+          <set token="source">$row.source$</set>
         </drilldown>
       </table>
     </panel>
@@ -89,35 +91,12 @@
   </row>
   <row>
     <panel>
-      <table>
-        <search>
-          <query>| mstats latest(CarOrdinal) as CarOrdinal
-latest(CarClass) as CarClass
-latest(CarPerformanceIndex) as PerformanceIndex
-latest(DrivetrainType) as DrivetrainType
-latest(NumCylinders) as NumCylinders
-latest(DistanceTraveled) as DistanceTraveled
-WHERE `forzametricsindex`
-| lookup CarClass.csv CarClass
-| lookup DrivetrainType.csv DrivetrainType
-| lookup CarOrdinal.csv CarOrdinal
-| table Manufacturer Model Class PerformanceIndex NumCylinders Drivetrain DistanceTraveled</query>
-          <earliest>$time.earliest$</earliest>
-          <latest>$time.latest$</latest>
-        </search>
-        <option name="count">10</option>
-        <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-      </table>
-    </panel>
-  </row>
-  <row>
-    <panel>
       <chart>
         <title>Steering</title>
         <search>
-          <query>| mstats latest(Steer) as Steer where `telemetry-index` span=1s 
-| eval Steer = Steer/1.27</query>
+          <query>| mstats prestats=true latest(car.Steering) as Steering where `telemetry-index` span=1s
+| timechart span=1s latest(car.Steering) as Steering
+| eval Steering = Steering/1.27</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -140,7 +119,8 @@ WHERE `forzametricsindex`
       <chart>
         <title>Gear</title>
         <search>
-          <query>| mstats latest(Gear) as Gear WHERE `forzametricsindex` span=1s</query>
+          <query>| mstats prestats=true latest(car.Gear) as Gear WHERE `telemetry-index` span=1s
+| timechart span=$span$ latest(car.Gear) as Gear</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -161,9 +141,10 @@ WHERE `forzametricsindex`
       <chart>
         <title>Inputs</title>
         <search>
-          <query>| mstats avg(Brake) as Brake avg(Accel) as Accel avg(HandBrake) as HandBrake WHERE `telemetry-index` span=1s
+          <query>| mstats prestats=true avg(car.Brake) avg(car.Throttle) avg(car.HandBrake) WHERE `telemetry-index` span=1s
+| timechart span=$span$ avg(car.Brake) as Brake avg(car.Throttle) as Throttle avg(car.HandBrake) as HandBrake
 | eval Brake=Brake/2.54
-| eval Accel=Accel/2.54
+| eval Throttle=Throttle/2.54
 | eval HandBrake=HandBrake/2.54</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -212,7 +193,8 @@ WHERE `forzametricsindex`
       <chart>
         <title>Speed / RPM</title>
         <search>
-          <query>| mstats avg(Speed) as Speed avg(EngineRpmCurrent) as EngineRpm WHERE `telemetry-index` span=1s
+          <query>| mstats prestats=true avg(car.Speed) avg(car.Rpm.Current) WHERE `telemetry-index` span=$span$
+| timechart span=$span$ avg(car.Speed) as Speed avg(car.Rpm.Current) as Rpm
 | eval Speed = Speed*$speed$</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -238,7 +220,10 @@ WHERE `forzametricsindex`
       <single>
         <title>Peak Wheel Temp</title>
         <search>
-          <query>| mstats max(TireTemp*) as * WHERE `telemetry-index` span=1s 
+          <query>| mstats max(car.Tyre.Temp.FrontLeft) as FrontLeft
+    max(car.Tyre.Temp.FrontRight) as FrontRight
+    max(car.Tyre.Temp.RearLeft) as RearLeft
+    max(car.Tyre.Temp.RearRight) as RearRight WHERE `telemetry-index` span=1s 
 | tail 999 
 | reverse</query>
           <earliest>$time.earliest$</earliest>
@@ -260,7 +245,7 @@ WHERE `forzametricsindex`
         <option name="trellis.splitBy">_aggregation</option>
         <option name="trendColorInterpretation">standard</option>
         <option name="trendDisplayMode">absolute</option>
-        <option name="unit">Â°C</option>
+        <option name="unit">°C</option>
         <option name="unitPosition">after</option>
         <option name="useColors">1</option>
         <option name="useThousandSeparators">0</option>
@@ -270,7 +255,10 @@ WHERE `forzametricsindex`
       <single>
         <title>Peak Wheel Slip</title>
         <search>
-          <query>| mstats max(TireCombinedSlip*) as * WHERE `telemetry-index` span=1s
+          <query>| mstats max(car.Tyre.SlipSpeed.FrontLeft) as FrontLeft
+    max(car.Tyre.SlipSpeed.FrontRight) as FrontRight
+    max(car.Tyre.SlipSpeed.RearLeft) as RearLeft
+    max(car.Tyre.SlipSpeed.RearRight) as RearRight WHERE `telemetry-index` span=1s 
 | tail 999 
 | reverse</query>
           <earliest>$time.earliest$</earliest>
@@ -301,7 +289,7 @@ WHERE `forzametricsindex`
       <single>
         <title>Peak Suspension</title>
         <search>
-          <query>| mstats max(NormalizedSuspensionTravel*) as * WHERE `telemetry-index` span=1s
+          <query>| mstats max(car.Suspension.Travel.*) as * WHERE `telemetry-index` span=1s
 | tail 999 
 | reverse</query>
           <earliest>$time.earliest$</earliest>
@@ -334,7 +322,7 @@ WHERE `forzametricsindex`
       <title>Map</title>
       <chart>
         <search>
-          <query>| mstats max(Speed) as Speed latest(PositionX) as X latest(PositionZ) as Z WHERE `telemetry-index` span=1s 
+          <query>| mstats max(car.Speed) as Speed latest(car.Position.X) as X latest(car.Position.Z) as Z WHERE `telemetry-index` span=1s 
 | where X!=0 OR Z!=0
 | eval Speed=Speed*$speed$
 | bin Speed start=0 bins=4
