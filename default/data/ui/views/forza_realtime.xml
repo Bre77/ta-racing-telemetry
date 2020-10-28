@@ -1,5 +1,5 @@
 <form theme="dark">
-  <label>Realtime</label>
+  <label>Forza Realtime</label>
   <search>
     <query>| mstats latest(PositionX) as lat latest(PositionY) as lon WHERE `telemetry-index`
             | eval lat=lat/100
@@ -43,13 +43,17 @@
     <panel>
       <table>
         <search>
-          <query>| mstats rate(net.DroppedEvents) as eps 
-latest(car.DistanceTraveled) as DistanceTraveled
-latest(car.RacePosition) as RacePosition
-latest(car.CurrentTime) as CurrentTime
+          <query>| mstats count(Speed) as eps latest(CarOrdinal) as CarOrdinal
+latest(CarClass) as CarClass
+latest(CarPerformanceIndex) as PerformanceIndex
+latest(DrivetrainType) as DrivetrainType
+latest(NumCylinders) as NumCylinders
+latest(DistanceTraveled) as DistanceTraveled
+latest(RacePosition) as RacePosition
 WHERE `telemetry-index`
-BY CarName CarClass CarDriveTrain host source
-| table CarName CarClass CarDriveTrain DistanceTraveled RacePosition CurrentTime</query>
+BY car.Name car.Class car.DriveTrain
+| eval eps = round(eps/60,1)
+| table car.Name car.Class car.DriveTrain DistanceTraveled RacePosition CurrentRaceTime eps</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -60,8 +64,6 @@ BY CarName CarClass CarDriveTrain host source
           <option name="precision">0</option>
           <option name="unit">m</option>
         </format>
-        <format type="number" field="CurrentTime"></format>
-        <format type="number" field="eps"></format>
       </table>
     </panel>
   </row>
@@ -70,9 +72,8 @@ BY CarName CarClass CarDriveTrain host source
       <chart>
         <title>Steering</title>
         <search>
-          <query>| mstats prestats=true latest(car.Steering) as Steering where `telemetry-index` span=$span$
-| timechart span=$span$ latest(car.Steering) as Steering
-| eval Steering = Steering/1.27</query>
+          <query>| mstats latest(Steer) as Steer where `telemetry-index` span=$span$
+| eval Steer = Steer/1.27</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -94,8 +95,7 @@ BY CarName CarClass CarDriveTrain host source
       <chart>
         <title>Gear</title>
         <search>
-          <query>| mstats prestats=true latest(car.Gear) as Gear WHERE `telemetry-index` span=$span$
-| timechart span=$span$ latest(car.Gear) as Gear</query>
+          <query>| mstats latest(Gear) as Gear WHERE `telemetry-index`  span=$span$</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -117,10 +117,9 @@ BY CarName CarClass CarDriveTrain host source
       <chart>
         <title>Inputs</title>
         <search>
-          <query>| mstats prestats=true avg(car.Brake) avg(car.Throttle) avg(car.HandBrake) WHERE `telemetry-index` span=1s
-| timechart span=$span$ avg(car.Brake) as Brake avg(car.Throttle) as Throttle avg(car.HandBrake) as HandBrake
+          <query>| mstats avg(Brake) as Brake avg(Accel) as Accel avg(HandBrake) as HandBrake WHERE `telemetry-index` span=$span$
 | eval Brake=Brake/2.54
-| eval Throttle=Throttle/2.54
+| eval Accel=Accel/2.54
 | eval HandBrake=HandBrake/2.54</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -169,8 +168,7 @@ BY CarName CarClass CarDriveTrain host source
       <chart>
         <title>Speed / RPM</title>
         <search>
-          <query>| mstats prestats=true avg(car.Speed) avg(car.Rpm.Current) WHERE `telemetry-index` span=$span$
-| timechart span=$span$ avg(car.Speed) as Speed avg(car.Rpm.Current) as Rpm
+          <query>| mstats avg(Speed) as Speed avg(EngineRpmCurrent) as EngineRpm WHERE `telemetry-index` span=$span$
 | eval Speed = Speed*$speed$</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -196,10 +194,7 @@ BY CarName CarClass CarDriveTrain host source
       <single>
         <title>Peak Wheel Temp</title>
         <search>
-          <query>| mstats max(car.Tyre.Temp.FrontLeft) as FrontLeft
-    max(car.Tyre.Temp.FrontRight) as FrontRight
-    max(car.Tyre.Temp.RearLeft) as RearLeft
-    max(car.Tyre.Temp.RearRight) as RearRight WHERE `telemetry-index` span=$span$</query>
+          <query>| mstats max(TireTemp*) as * WHERE `telemetry-index` span=$span$</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -207,7 +202,6 @@ BY CarName CarClass CarDriveTrain host source
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
         <option name="drilldown">none</option>
-        <option name="height">400</option>
         <option name="numberPrecision">0.0</option>
         <option name="rangeColors">["0x006d9c","0x53a051","0xf8be34","0xdc4e41"]</option>
         <option name="rangeValues">[75,150,200]</option>
@@ -220,18 +214,16 @@ BY CarName CarClass CarDriveTrain host source
         <option name="trellis.splitBy">_aggregation</option>
         <option name="trendColorInterpretation">standard</option>
         <option name="trendDisplayMode">absolute</option>
-        <option name="unit">°C</option>
+        <option name="unit">Â°C</option>
         <option name="unitPosition">after</option>
         <option name="useColors">1</option>
         <option name="useThousandSeparators">0</option>
+        <option name="height">400</option>
       </single>
       <single>
         <title>Peak Wheel Slip</title>
         <search>
-          <query>| mstats max(car.Tyre.SlipSpeed.FrontLeft) as FrontLeft
-    max(car.Tyre.SlipSpeed.FrontRight) as FrontRight
-    max(car.Tyre.SlipSpeed.RearLeft) as RearLeft
-    max(car.Tyre.SlipSpeed.RearRight) as RearRight WHERE `telemetry-index` span=$span$</query>
+          <query>| mstats max(TireCombinedSlip*) as * WHERE `telemetry-index` span=$span$</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -261,7 +253,7 @@ BY CarName CarClass CarDriveTrain host source
       <title>Map</title>
       <chart>
         <search>
-          <query>| mstats max(car.Speed) as Speed latest(car.Position.X) as X latest(car.Position.Z) as Z WHERE `telemetry-index` span=1s 
+          <query>| mstats max(Speed) as Speed latest(PositionX) as X latest(PositionZ) as Z WHERE `telemetry-index` span=1s 
 | where X!=0 OR Z!=0
 | eval Speed=Speed*$speed$
 | bin Speed start=0 bins=4

@@ -76,9 +76,9 @@ SCHEME = """<scheme>
 
 #https://docs.google.com/spreadsheets/d/1bw6EAud8uDcZvSfvVv1bh1-dhiB5j6X6kyI31rHliIQ/edit?usp=sharing
 
-pcars2_header = ["meta.PacketNumber","meta.CategoryPacketNumber","meta.PartialPacketIndex","meta.PartialPacketNumber","meta.PacketType","meta.PacketVersion"]
+pcars2_header = ["meta.Packet.Number","meta.CategoryPacketNumber","meta.PartialPacketIndex","meta.PartialPacketNumber","meta.Packet.Type","meta.PacketVersion"]
 pcars2_weather = ["weather.Temperature.Ambient","weather.Temperature.Track","weather.RainDensity","weather.SnowDensity","weather.WindSpeed","weather.WindDirection.X","weather.WindDirection.Y"]
-f1_2019_header = ["meta.PacketFormat","meta.Game.MajorVersion","meta.Game.MinorVersion","meta.packetVersion","meta.PacketNumber","meta.SessionUID","meta.SessionTime","meta.Frame","meta.PlayerIndex"]
+f1_2019_header = ["meta.Packet.Format","meta.Game.MajorVersion","meta.Game.MinorVersion","meta.Packet.Version","meta.Packet.Type","meta.SessionUID","meta.SessionTime","meta.Frame","meta.PlayerIndex"]
 
 labels = {
     "forza":         [None, "meta.Timestamp", "car.Rpm.Max", "car.Rpm.Idle", "car.Rpm.Current", "car.Acceleration.Local.X", "car.Acceleration.Local.Y", "car.Acceleration.Local.Z", "car.Velocity.Local.X", "car.Velocity.Local.Y", "car.Velocity.Local.Z", "car.Velocity.Angular.X", "car.Velocity.Angular.Y", "car.Velocity.Angular.Z", "car.Yaw", "car.Pitch", "car.Roll", "car.Suspension.NormalizedTravel.FrontLeft", "car.Suspension.NormalizedTravel.FrontRight", "car.Suspension.NormalizedTravel.RearLeft", "car.Suspension.NormalizedTravel.RearRight", "car.Tyre.SlipRatio.FrontLeft", "car.Tyre.SlipRatio.FrontRight", "car.Tyre.SlipRatio.RearLeft", "car.Tyre.SlipRatio.RearRight", "car.WheelRotationSpeed.FrontLeft", "car.WheelRotationSpeed.FrontRight", "car.WheelRotationSpeed.RearLeft", "car.WheelRotationSpeed.RearRight", "car.WheelOnRumbleStrip.FrontLeft", "car.WheelOnRumbleStrip.FrontRight", "car.WheelOnRumbleStrip.RearLeft", "car.WheelOnRumbleStrip.RearRight", "car.WheelInPuddleDepth.FrontLeft", "car.WheelInPuddleDepth.FrontRight", "car.WheelInPuddleDepth.RearLeft", "car.WheelInPuddleDepth.RearRight", "car.SurfaceRumble.FrontLeft", "car.SurfaceRumble.FrontRight", "car.SurfaceRumble.RearLeft", "car.SurfaceRumble.RearRight", "car.Tyre.SlipAngle.FrontLeft", "car.Tyre.SlipAngle.FrontRight", "car.Tyre.SlipAngle.RearLeft", "car.Tyre.SlipAngle.RearRight", "car.Tyre.SlipSpeed.FrontLeft", "car.Tyre.SlipSpeed.FrontRight", "car.Tyre.SlipSpeed.RearLeft", "car.Tyre.SlipSpeed.RearRight", "car.Suspension.Travel.FrontLeft", "car.SuspensionTravel.FrontRight", "car.Suspension.Travel.RearLeft", "car.Suspension.Travel.RearRight", None, None, "car.CarPerformanceIndex", None, "car.NumCylinders", "car.Position.X", "car.Position.Y", "car.Position.Z", "car.Speed", "car.Power", "car.Torque", "car.Tyre.Temp.FrontLeft", "car.Tyre.Temp.FrontRight", "car.Tyre.Temp.RearLeft", "car.Tyre.Temp.RearRight", "car.Boost", "car.Fuel.Level", "car.Distance", "car.Lap.Best", "car.Lap.Last", "car.Lap.Time", "car.CurrentTime", "car.LapNumber", "car.RacePosition", "car.Throttle", "car.Brake", "car.Clutch", "car.HandBrake", "car.Gear", "car.Steering", "car.NormalizedDrivingLine", "car.NormalizedAIBrakeDifference"],
@@ -86,7 +86,8 @@ labels = {
     "pcars2_tele":    pcars2_header + ["car.PlayerIndex","car.Throttle.Unfiltered","car.Brake.Unfiltered","car.Steering.Unfiltered","car.Clutch.Unfiltered",None,"car.Oil.Temp","car.Oil.Pressure","car.Water.Temp","car.Water.Pressure","car.Fuel.Pressure","car.Fuel.Capacity","car.Brake","car.Throttle","car.Clutch","car.Fuel.Level","car.Speed","car.Rpm.Current","car.Rpm.Max","car.Steering","car.Gear","car.Boost","car.CrashState","car.Odometer","car.Orientation.X","car.Orientation.Y","car.Orientation.Z","car.Velocity.Local.X","car.Velocity.Local.Y","car.Velocity.Local.Z","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.Velocity.Angular.X","car.Velocity.Angular.Y","car.Velocity.Angular.Z","car.Acceleration.Local.X","car.Acceleration.Local.Y","car.Acceleration.Local.Z","car.Acceleration.World.X","car.Acceleration.World.Y","car.Acceleration.World.Z","car.ExtentsCentre.X","car.ExtentsCentre.Y","car.ExtentsCentre.Z","car.Tyre.Flags.FrontLeft","car.Tyre.Flags.FrontRight","car.Tyre.Flags.RearLeft","car.Tyre.Flags.RearRight","car.Terrain.FrontLeft","car.Terrain.FrontRight","car.Terrain.RearLeft","car.Terrain.RearRight","car.Tyre.Y.FrontLeft","car.Tyre.Y.FrontRight","car.Tyre.Y.RearLeft","car.Tyre.Y.RearRight","car.Tyre.RPS.FrontLeft","car.Tyre.RPS.FrontRight","car.Tyre.RPS.RearLeft","car.Tyre.RPS.RearRight","car.Tyre.Temp.FrontLeft","car.Tyre.Temp.FrontRight","car.Tyre.Temp.RearLeft","car.Tyre.Temp.RearRight","car.Tyre.HeightAboveGround.FrontLeft","car.Tyre.HeightAboveGround.FrontRight","car.Tyre.HeightAboveGround.RearLeft","car.Tyre.HeightAboveGround.RearRight","car.Tyre.Wear.FrontLeft","car.Tyre.Wear.FrontRight","car.Tyre.Wear.RearLeft","car.Tyre.Wear.RearRight","car.Brake.Damage.FrontLeft","car.Brake.Damage.FrontRight","car.Brake.Damage.RearLeft","car.Brake.Damage.RearRight","car.Suspension.Damage.FrontLeft","car.Suspension.Damage.FrontRight","car.Suspension.Damage.RearLeft","car.Suspension.Damage.RearRight","car.Brake.Temp.FrontLeft","car.Brake.Temp.FrontRight","car.Brake.Temp.RearLeft","car.Brake.Temp.RearRight","car.Tyre.TreadTemp.FrontLeft","car.Tyre.TreadTemp.FrontRight","car.Tyre.TreadTemp.RearLeft","car.Tyre.TreadTemp.RearRight","car.Tyre.LayerTemp.FrontLeft","car.Tyre.LayerTemp.FrontRight","car.Tyre.LayerTemp.RearLeft","car.Tyre.LayerTemp.RearRight","car.CarcassTemp.FrontLeft","car.CarcassTemp.FrontRight","car.CarcassTemp.RearLeft","car.CarcassTemp.RearRight","car.Tyre.RimTemp.FrontLeft","car.Tyre.RimTemp.FrontRight","car.Tyre.RimTemp.RearLeft","car.Tyre.RimTemp.RearRight","car.Tyre.InternalAirTemp.FrontLeft","car.Tyre.InternalAirTemp.FrontRight","car.Tyre.InternalAirTemp.RearLeft","car.Tyre.InternalAirTemp.RearRight","car.Tyre.TempLeft.FrontLeft","car.Tyre.TempLeft.FrontRight","car.Tyre.TempLeft.RearLeft","car.Tyre.TempLeft.RearRight","car.Tyre.TempCenter.FrontLeft","car.Tyre.TempCenter.FrontRight","car.Tyre.TempCenter.RearLeft","car.Tyre.TempCenter.RearRight","car.Tyre.TempRight.FrontLeft","car.Tyre.TempRight.FrontRight","car.Tyre.TempRight.RearLeft","car.Tyre.TempRight.RearRight","car.WheelLocalPositionY.FrontLeft","car.WheelLocalPositionY.FrontRight","car.WheelLocalPositionY.RearLeft","car.WheelLocalPositionY.RearRight","car.RideHeight.FrontLeft","car.RideHeight.FrontRight","car.RideHeight.RearLeft","car.RideHeight.RearRight","car.Suspension.Travel.FrontLeft","car.Suspension.Travel.FrontRight","car.Suspension.Travel.RearLeft","car.Suspension.Travel.RearRight","car.Suspension.Velocity.FrontLeft","car.Suspension.Velocity.FrontRight","car.Suspension.Velocity.RearLeft","car.Suspension.Velocity.RearRight","car.Suspension.RideHeight.FrontLeft","car.Suspension.RideHeight.FrontRight","car.Suspension.RideHeight.RearLeft","car.Suspension.RideHeight.RearRight","car.AirPressure.FrontLeft","car.AirPressure.FrontRight","car.AirPressure.RearLeft","car.AirPressure.RearRight","car.Engine.Speed","car.Torque","car.Wings.1","car.Wings.2","car.HandBrake","car.AeroDamage","car.Engine.Damage","car.JoyPad","car.DPad","car.TurboBoostPressure","car.Position.X","car.Position.Y","car.Position.Z","car.Brake.Bias","car.TickCount"],
     "pcars2_state":   pcars2_header + ["state.BuildVersionNumber",None] + pcars2_weather,
     "pcars2_weather": pcars2_header + pcars2_weather,
-    "f1_2019_motion": f1_2019_header + ["car.Position.X","car.Position.Y","car.Position.Z","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.worldForwardDir.X","car.worldForwardDir.Y","car.worldForwardDir.Z","car.worldRightDir.X","car.worldRightDir.Y","car.worldRightDir.Z","car.gForce.Lateral","car.gForce.Longitudinal","car.gForce.Vertical","car.yaw","car.pitch","car.roll","car.Suspension.Position.FrontLeft","car.Suspension.Position.FrontRight","car.Suspension.Position.RearLeft","car.Suspension.Position.FrontLeft","","car.Suspension.Velocity.FrontLeft","car.Suspension.Velocity.FrontRight","car.Suspension.Velocity.RearLeft","car.Suspension.Velocity.FrontLeft","","car.Suspension.Acceleration.FrontLeft","car.Suspension.Acceleration.FrontRight","car.Suspension.Acceleration.RearLeft","car.Suspension.Acceleration.FrontLeft","","car.Wheel.Speed.FrontLeft","car.Wheel.Speed.FrontRight","car.Wheel.Speed.RearLeft","car.Wheel.Speed.FrontLeft","","car.Wheel.Slip.FrontLeft","car.Wheel.Slip.FrontRight","car.Wheel.Slip.RearLeft","car.Wheel.Slip.FrontLeft","","car.Velocity.Local.X","car.Velocity.Local.Y","car.Velocity.Local.Z","car.Velocity.Angular.X","car.Velocity.Angular.Y","car.Velocity.Angular.Z","car.Acceleration.Local.X","car.Acceleration.Local.Y","car.Acceleration.Local.Z","car.frontWheelsAngle"],
+    "f1_2019_motion": f1_2019_header + ["car.Position.X","car.Position.Y","car.Position.Z","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.worldForwardDir.X","car.worldForwardDir.Y","car.worldForwardDir.Z","car.worldRightDir.X","car.worldRightDir.Y","car.worldRightDir.Z","car.gForce.Lateral","car.gForce.Longitudinal","car.gForce.Vertical","car.yaw","car.pitch","car.roll","car.Suspension.Position.FrontLeft","car.Suspension.Position.FrontRight","car.Suspension.Position.RearLeft","car.Suspension.Position.FrontLeft","","car.Suspension.Velocity.FrontLeft","car.Suspension.Velocity.FrontRight","car.Suspension.Velocity.RearLeft","car.Suspension.Velocity.FrontLeft","","car.Suspension.Acceleration.FrontLeft","car.Suspension.Acceleration.FrontRight","car.Suspension.Acceleration.RearLeft","car.Suspension.Acceleration.FrontLeft","","car.Wheel.Speed.FrontLeft","car.Wheel.Speed.FrontRight","car.Wheel.Speed.RearLeft","car.Wheel.Speed.RearRihgt","","car.Wheel.Slip.FrontLeft","car.Wheel.Slip.FrontRight","car.Wheel.Slip.RearLeft","car.Wheel.Slip.RearRight","","car.Velocity.Local.X","car.Velocity.Local.Y","car.Velocity.Local.Z","car.Velocity.Angular.X","car.Velocity.Angular.Y","car.Velocity.Angular.Z","car.Acceleration.Local.X","car.Acceleration.Local.Y","car.Acceleration.Local.Z","car.frontWheelsAngle"],
+    "f1_2019_telemetry": f1_2019_header + ["car.Speed","car.Throttle","car.Steering","car.Brake","car.Clutch","car.Gear","car.Rpm.Current","car.drs","car.revLightsPercent","car.Brake.Temp.FrontLeft","car.Brake.Temp.FrontRight","car.Brake.Temp.RearLeft","car.Brake.Temp.RearRight","car.Tyre.SurfaceTemp.FrontLeft", "car.Tyre.SurfaceTemp.FrontRight","car.Tyre.SurfaceTemp.RearLeft","car.Tyre.SurfaceTemp.RearRight","car.Tyre.InnerTemp.FrontLeft","car.Tyre.InnerTemp.FrontRight","car.Tyre.InnerTemp.RearLeft", "car.Tyre.InnerTemp.RearRight","car.EngineTemp","car.Tyre.Pressure.FrontLeft","car.Tyre.Pressure.FrontRight","car.Tyre.Pressure.RearLeft","car.Tyre.Pressure.RearRight","meta.Surface.FrontLeft","meta.Surface.FrontRight","meta.Surface.BackLeft","meta.Surface.BackRight"],
     "f1":             ["meta.Timestamp","car.Lap.Time","car.Lap.Distance","car.Distance","car.Position.X","car.Position.Y","car.Position.Z","car.Speed","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.Roll.X","car.Roll.Y","car.Roll.Z","car.Pitch.X","car.Pitch.Y","car.Pitch.Z","car.Suspension.Position.RearLeft","car.Suspension.Position.RearRight","car.Suspension.Position.FrontLeft","car.Suspension.Position.FrontRight","car.Suspension.Velocity.RearLeft","car.Suspension.Velocity.RearRight","car.Suspension.Velocity.FrontLeft","car.Suspension.Velocity.RearRight","car.Wheel.Velocity.BlackLeft","car.Wheel.Velocity.BackRight","car.Wheel.Velocity.FrontLeft","car.Wheel.Velocity.FrontRight","car.Throttle","car.Steering","car.Brake","car.Clutch","car.Gear","car.GForce.Lateral","car.GForce.Longitudinal","car.Lap","car.Rpm.Current",None,"car.RacePosition","car.Kers.Current","car.Kers.Max",None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None],
     "dirt":           ["meta.Timestamp","car.Lap.Time","car.Lap.Distance","car.Distance","car.Position.X","car.Position.Y","car.Position.Z","car.Speed","car.Velocity.World.X","car.Velocity.World.Y","car.Velocity.World.Z","car.Roll.X","car.Roll.Y","car.Roll.Z","car.Pitch.X","car.Pitch.Y","car.Pitch.Z","car.Suspension.Position.RearLeft","car.Suspension.Position.RearRight","car.Suspension.Position.FrontLeft","car.Suspension.Position.FrontRight","car.Suspension.Velocity.RearLeft","car.Suspension.Velocity.RearRight","car.Suspension.Velocity.FrontLeft","car.Suspension.Velocity.RearRight","car.Wheel.Velocity.BlackLeft","car.Wheel.Velocity.BackRight","car.Wheel.Velocity.FrontLeft","car.Wheel.Velocity.FrontRight","car.Throttle","car.Steering","car.Brake","car.Clutch","car.Gear","car.GForce.Lateral","car.GForce.Longitudinal","car.Lap","car.Rpm.Current",None,"car.RacePosition"]
 }
@@ -173,7 +174,7 @@ def run_script():
     # Prebuild whitelist to improve performance
     whitelist = {}
     for label in labels:
-        arr = map(lambda metric: metric is not None and bool(re.search(opt_whitelist,metric)),labels[label])
+        arr = list(map(lambda metric: metric is not None and bool(re.search(opt_whitelist,metric)),labels[label]))
         count = sum(arr)
         if count>0:
             whitelist[label] = arr
@@ -203,16 +204,14 @@ def run_script():
             return default
 
     def ratelimit(time,i,host,limit):
+        if limit == 0:
+            return True
         key = "{}:{}".format(i,host)
-        if time >= limiter.get(key,0)+limit:
+        if time >= limiter.get(key,0.0)+limit:
             limiter[key] = time
             return True
-        else:
-            drops[host]+=1
-            #rops[host] = drops.get(host,0) + 1
-            #dimensions[host]['metric_name:net.DroppedEvents']+=1 # It should be logically impossible for this to not exist
-            #dimensions[host]['metric_name:net.DroppedEvents'] = dimensions[host].get('metric_name:net.DroppedEvents',0)+1
-            return False
+        drops[host]+=1
+        return False
 
     while True:
         try:
@@ -221,195 +220,228 @@ def run_script():
             host = addr[0]
             source = None
 
-            if not dimensions.has_key(host):
+            if host not in dimensions:
                 dimensions[host] = {"GameState": "Unknown"}
                 drops[host] = 0
 
             size = len(packet)
 
-            logging.debug("Received {} bytes from {}".format(size,host))
+            logging.debug("{} Received {} bytes from {}".format(now, size,host))
 
-            #Check for static sized payloads
-            if(size == 324): #Forza Horizon 4
-                #if whitelist["forza"] and now >= (limiter.get("324:"+host,0)+opt_rate_limit):
-                if whitelist["forza"] and ratelimit(now,"324",host,opt_rate_limit):
-                    values = struct.unpack('<i I 27f 4i 20f 5i 12x 17f H 6B 3b x',packet)
-                    if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
+            #Check for known headers
+            if((packet[0]) == 227 and (packet[1]) == 7): #F1 2019
+                
+                v = (packet[4])      # Packet Version
+                i = (packet[5])      # Packet Id
+                p = (packet[22])     # Player Index
+                if (size == 1343 and i == 0 and v == 1): #F1 2019 - Motion
+                    label = "f1_2019_motion"
+                    if whitelist[label] and ratelimit(now,label,host,opt_rate_limit): #now >= (limiter.get(label+":"+host,0)+opt_rate_limit):
+                        #limiter[label+":"+host] = now
+                        source = "F1 2019"
+                        values = struct.unpack("<H 4B QfIB {} 6f 6h 6f {} 30f".format(p*"60x",(19-p)*"60x"),packet) # Removes all other cars except the players
+                elif (size == 149 and i == 1 and v == 1): #F1 2019 - Session
+                    pass
+                elif (size == 843 and i == 2 and v == 1): #F1 2019 - Lap
+                    pass
+                elif (size == 32 and i == 3 and v == 1): #F1 2019 - Event
+                    pass
+                elif (size == 1104 and i == 4 and v == 1): #F1 2019 - Participants
+                    pass
+                elif (size == 843 and i == 5 and v == 1): #F1 2019 - Setup 
+                    pass
+                elif (size == 1347 and i == 6 and v == 1): #F1 2019 - Telemetry 
+                    label = "f1_2019_telemetry"
+                    if whitelist[label] and ratelimit(now,label,host,opt_rate_limit): #now >= (limiter.get(label+":"+host,0)+opt_rate_limit):
+                        #limiter[label+":"+host] = now
+                        source = "F1 2019"
+                        values = struct.unpack("<H 4B QfIB {} i 3f b B H 2B 13H 4f 4B {} 4x".format(p*"66x",(19-p)*"66x"),packet) # Removes all other cars except the players
+                elif (size == 1143 and i == 7 and v == 1): #F1 2019 - Status 
+                    pass
+                else:
+                    logging.info("Size: {} Id: {} Version: {} not configured".format(size,i,v))
 
-                    limiter["324:"+host] = now
-                    source = "Forza Horizon 4"
-                    label = "forza"
+            else:
+                #Check for static sized payloads
+                if(size == 324): #Forza Horizon 4
+                    #if whitelist["forza"] and now >= (limiter.get("324:"+host,0)+opt_rate_limit):
+                    if whitelist["forza"] and ratelimit(now,"324",host,opt_rate_limit):
+                        values = struct.unpack('<i I 27f 4i 20f 5i 12x 17f H 6B 3b x',packet)
+                        if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
 
-                    dimensions[host]['GameState'] = enums["forza_state.Game"][values[0]]
-                    dimensions[host]['CarName'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
-                    dimensions[host]['CarClass'] = list_get(enums["forza_car.Class"],values[54],values[54])
-                    dimensions[host]['CarDriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
+                        #limiter["324:"+host] = now
+                        source = "Forza Horizon 4"
+                        label = "forza"
 
-                    
+                        dimensions[host]['GameState'] = enums["forza_state.Game"][values[0]]
+                        dimensions[host]['CarName'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
+                        dimensions[host]['CarClass'] = list_get(enums["forza_car.Class"],values[54],values[54])
+                        dimensions[host]['CarDriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
 
-            elif (size == 311): #Forza Motorsport 7 - Dash mode
-                if whitelist["forza"] and now >= (limiter.get("311:"+host,0)+opt_rate_limit):
-                    values = struct.unpack('<i I 27f 4i 20f 5i 17f H 6B 3b',packet)
-                    if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
-                    
-                    limiter["311:"+host] = now
-                    source = "Forza Motorsport 7"
-                    label = "forza"
-                    
-                    dimensions[host]['GameState'] = enums["forza_state.Game"][values[0]]
-                    dimensions[host]['CarName'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
-                    dimensions[host]['CarClass'] = list_get(enums["forza_car.Class"],values[54],values[54])
-                    dimensions[host]['CarDriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
+                        
 
-            elif (size == 232): #Forza Motorsport 7 - Sled mode
-                if whitelist["forza"] and now >= (limiter.get("232:"+host,0)+opt_rate_limit):
-                    values = struct.unpack('<i I 27f 4i 20f 5i',packet)
-                    if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
-                    
-                    limiter["232:"+host] = now
-                    source = "Forza Motorsport 7"
-                    label = "forza"
-                    
-                    dimensions[host]['GameState'] = enums["forza_state.Game"][values[0]]
-                    dimensions[host]['CarName'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
-                    dimensions[host]['CarClass'] = list_get(enums["forza_car.Class"],values[54],values[54])
-                    dimensions[host]['CarDriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
+                elif (size == 311): #Forza Motorsport 7 - Dash mode
+                    if whitelist["forza"] and ratelimit(now,"311",host,opt_rate_limit): #now >= (limiter.get("311:"+host,0)+opt_rate_limit):
+                        values = struct.unpack('<i I 27f 4i 20f 5i 17f H 6B 3b',packet)
+                        if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
+                        
+                        #limiter["311:"+host] = now
+                        source = "Forza Motorsport 7"
+                        label = "forza"
+                        
+                        dimensions[host]['GameState'] = enums["forza_state.Game"][values[0]]
+                        dimensions[host]['CarName'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
+                        dimensions[host]['CarClass'] = list_get(enums["forza_car.Class"],values[54],values[54])
+                        dimensions[host]['CarDriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
 
-            elif (size == 559): #Project Cars 2 Patch 5 - Telemetry
-                if whitelist["pcars2_tele"] and now >= (limiter.get("559:"+host,0)+opt_rate_limit):
-                    if(opt_filtermenu and not dimensions[host]['GameState'] == "Playing"): continue # In Menu, no useful data
+                elif (size == 232): #Forza Motorsport 7 - Sled mode
+                    if whitelist["forza"] and ratelimit(now,"232",host,opt_rate_limit): #now >= (limiter.get("232:"+host,0)+opt_rate_limit):
+                        values = struct.unpack('<i I 27f 4i 20f 5i',packet)
+                        if(opt_filtermenu and values[0] == 0): continue # In Menu, no useful data
+                        
+                        #limiter["232:"+host] = now
+                        source = "Forza Motorsport 7"
+                        label = "forza"
+                        
+                        dimensions[host]['GameState'] = enums["forza_state.Game"][values[0]]
+                        dimensions[host]['CarName'] = forza_cars.get(values[53],"Unknown Car {}".format(values[53]))
+                        dimensions[host]['CarClass'] = list_get(enums["forza_car.Class"],values[54],values[54])
+                        dimensions[host]['CarDriveTrain'] = list_get(enums["forza_car.DriveTrain"],values[56],values[56])
 
-                    values = struct.unpack('<2I 4B bBBbBBhHhHHBBBBffHHbBBB 22f 8B 8f 4B 4f 12B 4h 32H 16f 8H ff 5B IB 160x 4f BI',packet)
+                elif (size == 559): #Project Cars 2 Patch 5 - Telemetry
+                    if whitelist["pcars2_tele"] and ratelimit(now,"559",host,opt_rate_limit): #now >= (limiter.get("559:"+host,0)+opt_rate_limit):
+                        if(opt_filtermenu and not dimensions[host]['GameState'] == "Playing"): continue # In Menu, no useful data
 
-                    #Fix Gears Nibble
-                    values[45] = values[45] % 16
-                    if(values[45] == 15): values[45] = -1 # Reverse
+                        values = struct.unpack('<2I 4B bBBbBBhHhHHBBBBffHHbBBB 22f 8B 8f 4B 4f 12B 4h 32H 16f 8H ff 5B IB 160x 4f BI',packet)
 
-                    limiter["559:"+host] = now
-                    source = "Project Cars 2"
-                    label = "pcars2_tele"
-                    
+                        #Fix Gears Nibble
+                        logging.info(values[45])
+                        values[45] = (values[45] % 16)
+                        if(values[45] == 15): values[s745] = -1 # Reverse
+                        logging.info(values[45])
 
-                    cns = cars.get(host,[])
-                    idx = values[6]*2 # Move to correct offset
-                    if idx<len(cns):
-                        dimensions[host]['CarName'] = str(format(cns[idx]))
+                        limiter["559:"+host] = now
+                        source = "Project Cars 2"
+                        label = "pcars2_tele"
+                        
 
-            elif (size == 1063): #Project Cars 2 Patch 5 - Timing Data
-                continue      
-            elif (size == 24): #Project Cars 2 Patch 5 - Game State (Dimensions Only)
-                #if whitelist["pcars2_state"] and now >= (limiter.get("24:"+host,0)+opt_rate_limit):
-                    #limiter["24:"+host] = now
-                    #source = "Project Cars 2"
-                    #label = "pcars2_state"
-                values = struct.unpack('<2I 4B HbbbBBbbbxx',packet)
+                        cns = cars.get(host,[])
+                        idx = values[6]*2 # Move to correct offset
+                        if idx<len(cns):
+                            dimensions[host]['CarName'] = str(format(cns[idx]))
 
-                dimensions[host]['GameState'] = enums["pcars_state.Game"][values[7] % 8]
-                dimensions[host]['SessionState'] = enums["pcars_state.Session"][values[7]>>4 % 8]
+                elif (size == 1063): #Project Cars 2 Patch 5 - Timing Data
+                    continue      
+                elif (size == 24): #Project Cars 2 Patch 5 - Game State (Dimensions Only)
+                    #if whitelist["pcars2_state"] and now >= (limiter.get("24:"+host,0)+opt_rate_limit):
+                        #limiter["24:"+host] = now
+                        #source = "Project Cars 2"
+                        #label = "pcars2_state"
+                    values = struct.unpack('<2I 4B HbbbBBbbbxx',packet)
 
-                dimensions[host]['CarHeadlights'] = enums["onoff"][values[11]&1]
-                dimensions[host]['CarEngine'] = enums["onoff"][values[11]&2]
-                dimensions[host]['CarEngineWarning'] = enums["onoff"][values[11]&4]
-                dimensions[host]['CarSpeedLimiter'] = enums["onoff"][values[11]&8]
-                dimensions[host]['CarABS'] = enums["onoff"][values[11]&16]
-                dimensions[host]['CarHandBrake'] = enums["onoff"][values[11]&32]
+                    dimensions[host]['GameState'] = enums["pcars_state.Game"][values[7] % 8]
+                    dimensions[host]['SessionState'] = enums["pcars_state.Session"][values[7]>>4 % 8]
 
-            elif (size == 1164): #Project Cars 2 Patch 5 - Vehicle Names
-                #carsnames[host] = struct.unpack('<12x HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx',packet)
-                #strings["pcars2:"+host] = struct.unpack('<12x 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s',packet)
-                cars[host] = struct.unpack('<12x 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s',packet)
-                times[host] = now
+                    dimensions[host]['CarHeadlights'] = enums["onoff"][values[11]&1]
+                    dimensions[host]['CarEngine'] = enums["onoff"][values[11]&2]
+                    dimensions[host]['CarEngineWarning'] = enums["onoff"][values[11]&4]
+                    dimensions[host]['CarSpeedLimiter'] = enums["onoff"][values[11]&8]
+                    dimensions[host]['CarABS'] = enums["onoff"][values[11]&16]
+                    dimensions[host]['CarHandBrake'] = enums["onoff"][values[11]&32]
 
-            #elif (size == 1452): #Project Cars 2 Patch 5 - Class Names (Wasnt comprehensive, so useless in the end)
-            #    a = struct.unpack('<12x I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s',packet)
-            #    cars[host] = [None] * 16
-            #    b = {}
-            #    for x in range(60): # Build dict of ClassID -> ClassName
-            #        b[a[x*2]] = a[x*2+1]
-            #    logging.info(b)
-            #    for c in range(16): # Replace ID with String
-            #        cars[host][c] = {"car.class": b[strings["pcars2:"+host][c*2]].rstrip('\x00'), "car.name": strings["pcars2:"+host][c*2+1].rstrip('\x00')} #need to move this to a new output array
-            #    logging.info(cars[host])
-            #    strings["pcars2:"+host] = None
-            #elif (size == 374): #Project Cars 1 - Telemetry
-            #    if whitelist["pcars2_tele"] and now >= (limiter.get("374:"+host,0)+opt_rate_limit):
-            #        limiter["374:"+host] = now
-            #        source = "Project Cars 1"
-            #        label = "pcars2_tele"
-            #        values = struct.unpack('<2I 4B bBBbBBhHhHHBBBBffHHbBBB 22f 8B 8f 4B 4f 12B 4h 32H 16f 8H ff 5B IB',packet)
-            #elif (size == 16): #Project Cars 1 - Game State
-            #    if whitelist["pcars2_state"] and now >= (limiter.get("16:"+host,0)+opt_rate_limit):
-            #        limiter["16:"+host] = now
-            #        source = "Project Cars 1"
-            #        label = "pcars2_state"
-            #        values = struct.unpack('<2I 4B Hc',packet)
-            #elif (size == 19): #Project Cars 1 - Weather
-            #    if whitelist["pcars2_weather"] and now >= (limiter.get("19:"+host,0)+opt_rate_limit):
-            #        limiter["19:"+host] = now
-            #        source = "Project Cars 1"
-            #        label = "pcars2_weather"
-            #        values = struct.unpack('<2I 4B bbBBbbb',packet)
-            elif (size == 1367): #Project Cars 1 - Telemetry
-                if whitelist["pcars1"] and now >= (limiter.get("1367:"+host,0)+opt_rate_limit):
-                    values = struct.unpack("<HB b bb BBbBB B 21f H B B hHhHH BBBBBb ffHHBBbB 22f 8B 12f 8B 8f 12B 4h 20H 16f 4H ff BB bbBbbb 896x fBB x",packet)
-                    if(opt_filtermenu and (values[7] % 8) != 2): continue # In Menu, no useful data
+                elif (size == 1164): #Project Cars 2 Patch 5 - Vehicle Names
+                    #carsnames[host] = struct.unpack('<12x HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx HI64sxx',packet)
+                    #strings["pcars2:"+host] = struct.unpack('<12x 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s 4xI64s',packet)
+                    cars[host] = struct.unpack('<12x 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s 8x64s',packet)
+                    times[host] = now
 
-                    limiter["1367:"+host] = now
-                    source = "Project Cars 1"
-                    label = "pcars1"
-                    
-                    dimensions[host]['GameState'] = enums["pcars_state.Game"][values[2] % 8]
-                    dimensions[host]['SessionState'] = enums["pcars_state.Session"][values[2]>>4 % 8]
+                #elif (size == 1452): #Project Cars 2 Patch 5 - Class Names (Wasnt comprehensive, so useless in the end)
+                #    a = struct.unpack('<12x I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s I20s',packet)
+                #    cars[host] = [None] * 16
+                #    b = {}
+                #    for x in range(60): # Build dict of ClassID -> ClassName
+                #        b[a[x*2]] = a[x*2+1]
+                #    logging.info(b)
+                #    for c in range(16): # Replace ID with String
+                #        cars[host][c] = {"car.class": b[strings["pcars2:"+host][c*2]].rstrip('\x00'), "car.name": strings["pcars2:"+host][c*2+1].rstrip('\x00')} #need to move this to a new output array
+                #    logging.info(cars[host])
+                #    strings["pcars2:"+host] = None
+                #elif (size == 374): #Project Cars 1 - Telemetry
+                #    if whitelist["pcars2_tele"] and now >= (limiter.get("374:"+host,0)+opt_rate_limit):
+                #        limiter["374:"+host] = now
+                #        source = "Project Cars 1"
+                #        label = "pcars2_tele"
+                #        values = struct.unpack('<2I 4B bBBbBBhHhHHBBBBffHHbBBB 22f 8B 8f 4B 4f 12B 4h 32H 16f 8H ff 5B IB',packet)
+                #elif (size == 16): #Project Cars 1 - Game State
+                #    if whitelist["pcars2_state"] and now >= (limiter.get("16:"+host,0)+opt_rate_limit):
+                #        limiter["16:"+host] = now
+                #        source = "Project Cars 1"
+                #        label = "pcars2_state"
+                #        values = struct.unpack('<2I 4B Hc',packet)
+                #elif (size == 19): #Project Cars 1 - Weather
+                #    if whitelist["pcars2_weather"] and now >= (limiter.get("19:"+host,0)+opt_rate_limit):
+                #        limiter["19:"+host] = now
+                #        source = "Project Cars 1"
+                #        label = "pcars2_weather"
+                #        values = struct.unpack('<2I 4B bbBBbbb',packet)
+                elif (size == 1367): #Project Cars 1 - Telemetry
+                    if whitelist["pcars1"] and now >= (limiter.get("1367:"+host,0)+opt_rate_limit):
+                        values = struct.unpack("<HB b bb BBbBB B 21f H B B hHhHH BBBBBb ffHHBBbB 22f 8B 12f 8B 8f 12B 4h 20H 16f 4H ff BB bbBbbb 896x fBB x",packet)
+                        if(opt_filtermenu and (values[7] % 8) != 2): continue # In Menu, no useful data
 
-                    dimensions[host]['CarHeadlight'] = enums["onoff"][values[40]&1]
-                    dimensions[host]['CarEngine'] = enums["onoff"][values[40]&2]
-                    dimensions[host]['CarEngineWarning'] = enums["onoff"][values[40]&4]
-                    dimensions[host]['CarSpeedLimiter'] = enums["onoff"][values[40]&8]
-                    dimensions[host]['CarABS'] = enums["onoff"][values[40]&16]
-                    dimensions[host]['CarHandBrake'] = enums["onoff"][values[40]&32]
-            
-            elif (size == 1347): #Project Cars 1 - Participant Strings
-                strings = struct.unpack("<3x 64s 64s 64s 64s 1088x",packet)
-                dimensions[host]['CarName'] = str(strings[0])
-                dimensions[host]['CarClass'] = str(strings[1])
-                dimensions[host]['TrackName'] = str(strings[2])
-                dimensions[host]['TrackVarient'] = str(strings[3])
-                    
-            elif (size == 1343): #F1 2019 - Motion
-                if whitelist["f12019_motion"] and now >= (limiter.get("1343:"+host,0)+opt_rate_limit):
-                    limiter["1343:"+host] = now
-                    source = "F1 2019"
-                    label = "f12019_motion"
-                    playerindex = packet[22]
-                    values = struct.unpack("<H 4B QfIB {} 6f 6h 6f {} 30f".format(playerindex*"60x",(18-playerindex)*"60x"),packet) # Removes all other cars except the players
-            elif (size == 68): #Dirt Rally - Mode 0
-                if whitelist["dirt"] and now >= (limiter.get("68:"+host,0)+opt_rate_limit):
-                    values = struct.unpack("<17f",packet)
+                        limiter["1367:"+host] = now
+                        source = "Project Cars 1"
+                        label = "pcars1"
+                        
+                        dimensions[host]['GameState'] = enums["pcars_state.Game"][values[2] % 8]
+                        dimensions[host]['SessionState'] = enums["pcars_state.Session"][values[2]>>4 % 8]
 
-                    limiter["68:"+host] = now
-                    source = "Codemasters"
-                    label = "dirt"
-                    
-            elif (size == 152): #Dirt Rally - Mode 1
-                if whitelist["dirt"] and now >= (limiter.get("152:"+host,0)+opt_rate_limit):
-                    values = struct.unpack("<38f",packet)
+                        dimensions[host]['CarHeadlight'] = enums["onoff"][values[40]&1]
+                        dimensions[host]['CarEngine'] = enums["onoff"][values[40]&2]
+                        dimensions[host]['CarEngineWarning'] = enums["onoff"][values[40]&4]
+                        dimensions[host]['CarSpeedLimiter'] = enums["onoff"][values[40]&8]
+                        dimensions[host]['CarABS'] = enums["onoff"][values[40]&16]
+                        dimensions[host]['CarHandBrake'] = enums["onoff"][values[40]&32]
+                
+                elif (size == 1347): #Project Cars 1 - Participant Strings
+                    strings = struct.unpack("<3x 64s 64s 64s 64s 1088x",packet)
+                    dimensions[host]['CarName'] = str(strings[0])
+                    dimensions[host]['CarClass'] = str(strings[1])
+                    dimensions[host]['TrackName'] = str(strings[2])
+                    dimensions[host]['TrackVarient'] = str(strings[3])
+                        
+                elif (size == 68): #Dirt Rally - Mode 0
+                    if whitelist["dirt"] and now >= (limiter.get("68:"+host,0)+opt_rate_limit):
+                        values = struct.unpack("<17f",packet)
 
-                    limiter["152:"+host] = now
-                    source = "Codemasters"
-                    label = "dirt"
-                    
-            else: #Unrecognised UDP packet length
-                logging.info("Unknown Packet Size '%s'" % size)
-                continue 
+                        limiter["68:"+host] = now
+                        source = "Codemasters"
+                        label = "dirt"
+                        
+                elif (size == 152): #Dirt Rally - Mode 1
+                    if whitelist["dirt"] and now >= (limiter.get("152:"+host,0)+opt_rate_limit):
+                        values = struct.unpack("<38f",packet)
+
+                        limiter["152:"+host] = now
+                        source = "Codemasters"
+                        label = "dirt"
+                        
+                else: #Unrecognised UDP packet length
+                    logging.warn("Unknown Packet Size '%s'" % size)
+                    continue 
 
             if source:
                 data = dimensions[host].copy()
                 if(opt_multimetric):
-                    for enabled,name,value in zip(whitelist[label],labels[label],values):
-                        if(enabled):
-                            data["metric_name:{}".format(name)] = value
+                    #for enabled,name,value in zip(whitelist[label],labels[label],values):
+                    #    if(enabled):
+                    #        data["metric_name:{}".format(name)] = value
+                    for name,value in zip(labels[label],values):
+                        #data["metric_name:{}".format(name)] = value
+                        data[name] = value
                     
                     data["metric_name:net.DroppedEvents"] = drops[host] # Add special DroppedEvents metric
+                    #logging.info("<stream><event><time>{}</time><host>{}</host><source>{}</source><data>{}</data></event></stream>".format(now,host,source,json.dumps(data)))
                     print("<stream><event><time>{}</time><host>{}</host><source>{}</source><data>{}</data></event></stream>".format(now,host,source,json.dumps(data)))
                 else:
                     print("<stream>")

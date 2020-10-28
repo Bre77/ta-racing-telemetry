@@ -1,36 +1,16 @@
 <form theme="dark">
-  <label>Realtime</label>
-  <search>
-    <query>| mstats latest(PositionX) as lat latest(PositionY) as lon WHERE `telemetry-index`
-            | eval lat=lat/100
-            | eval lon=lon/100
-          </query>
-    <earliest>$time.earliest$</earliest>
-    <latest>$time.latest$</latest>
-    <sampleRatio>1</sampleRatio>
-    <preview>
-      <set token="lat">result.lat</set>
-      <set token="lon">result.lon</set>
-    </preview>
-  </search>
+  <label>Previous Sessions</label>
   <init>
     <set token="speedunit">KM/h</set>
   </init>
   <fieldset submitButton="false">
-    <input type="time" token="time" rejects="session">
-      <label>Time</label>
-      <default>
-        <earliest>rt-1m</earliest>
-        <latest>rt</latest>
-      </default>
-    </input>
     <input type="text" token="span">
       <label>Span (ms)</label>
       <default>1s</default>
     </input>
     <input type="radio" token="speed" searchWhenChanged="true">
       <label>Speed Units</label>
-      <choice value="3.6">KM/h</choice>
+      <choice value="3.6">Km/h</choice>
       <choice value="2.2369">Mi/h</choice>
       <default>3.6</default>
       <initialValue>3.6</initialValue>
@@ -41,27 +21,71 @@
   </fieldset>
   <row>
     <panel>
+      <title>Sessions</title>
+      <input type="time" token="sessiontime" searchWhenChanged="true">
+        <label>Session Search</label>
+        <default>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+        </default>
+      </input>
       <table>
         <search>
-          <query>| mstats rate(net.DroppedEvents) as eps 
-latest(car.DistanceTraveled) as DistanceTraveled
-latest(car.RacePosition) as RacePosition
-latest(car.CurrentTime) as CurrentTime
-WHERE `telemetry-index`
-BY CarName CarClass CarDriveTrain host source
-| table CarName CarClass CarDriveTrain DistanceTraveled RacePosition CurrentTime</query>
+          <query>| mstats avg(car.Speed) as speed WHERE `telemetry-index` "GameState"!=Menu by CarName host source span=1s 
+| transaction CarName host source maxspan=60s maxpause=-1 
+| eval end = _time+duration+1, duration=`reltime(duration)` 
+| eventstats avg(speed) as AvgSpeed by _time host source 
+| eval AvgSpeed = AvgSpeed*$speed$ 
+| table _time end host source AvgSpeed CarName duration eventcount</query>
+          <earliest>$sessiontime.earliest$</earliest>
+          <latest>$sessiontime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">5</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="number" field="duration">
+          <option name="precision">0</option>
+          <option name="unit">min</option>
+        </format>
+        <format type="number" field="AvgSpeed">
+          <option name="precision">1</option>
+          <option name="unit">$speedunit$</option>
+          <option name="useThousandSeparators">false</option>
+        </format>
+        <drilldown>
+          <set token="time.earliest">$row._time$</set>
+          <set token="time.latest">$row.end$</set>
+          <set token="host">$row.host$</set>
+          <set token="source">$row.source$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel depends="session">
+      <table>
+        <title>Lap Drilldown</title>
+        <search>
+          <query>| mstats latest(car.LapNumber) as lap WHERE `telemetry-index` span=1s
+| transaction lap
+| table _time duration lap 
+| where lap!=0
+| eval end = _time+duration</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
-        <option name="count">10</option>
-        <option name="drilldown">none</option>
+        <option name="drilldown">row</option>
         <option name="refresh.display">progressbar</option>
-        <format type="number" field="DistanceTraveled">
-          <option name="precision">0</option>
-          <option name="unit">m</option>
-        </format>
-        <format type="number" field="CurrentTime"></format>
-        <format type="number" field="eps"></format>
+        <drilldown>
+          <set token="time.earliest">$row._time$</set>
+          <set token="time.latest">$row.end$</set>
+        </drilldown>
       </table>
     </panel>
   </row>
@@ -70,8 +94,8 @@ BY CarName CarClass CarDriveTrain host source
       <chart>
         <title>Steering</title>
         <search>
-          <query>| mstats prestats=true latest(car.Steering) as Steering where `telemetry-index` span=$span$
-| timechart span=$span$ latest(car.Steering) as Steering
+          <query>| mstats prestats=true latest(car.Steering) as Steering where `telemetry-index` span=1s
+| timechart span=1s latest(car.Steering) as Steering
 | eval Steering = Steering/1.27</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -84,6 +108,7 @@ BY CarName CarClass CarDriveTrain host source
         <option name="charting.chart">bar</option>
         <option name="charting.chart.rangeValues">[-100,-90,-70,70,90,100]</option>
         <option name="charting.chart.style">minimal</option>
+        <option name="charting.drilldown">all</option>
         <option name="charting.gaugeColors">["0xdc4e41","0xf1813f","0x53a051","0xf1813f","0xdc4e41"]</option>
         <option name="charting.legend.placement">none</option>
         <option name="height">250</option>
@@ -94,7 +119,7 @@ BY CarName CarClass CarDriveTrain host source
       <chart>
         <title>Gear</title>
         <search>
-          <query>| mstats prestats=true latest(car.Gear) as Gear WHERE `telemetry-index` span=$span$
+          <query>| mstats prestats=true latest(car.Gear) as Gear WHERE `telemetry-index` span=1s
 | timechart span=$span$ latest(car.Gear) as Gear</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -102,8 +127,7 @@ BY CarName CarClass CarDriveTrain host source
         <option name="charting.axisLabelsY.majorUnit">1</option>
         <option name="charting.axisTitleX.visibility">collapsed</option>
         <option name="charting.axisTitleY.visibility">collapsed</option>
-        <option name="charting.axisY.maximumNumber">8</option>
-        <option name="charting.chart">column</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.showDataLabels">none</option>
         <option name="charting.chart.stackMode">default</option>
         <option name="charting.drilldown">none</option>
@@ -199,7 +223,9 @@ BY CarName CarClass CarDriveTrain host source
           <query>| mstats max(car.Tyre.Temp.FrontLeft) as FrontLeft
     max(car.Tyre.Temp.FrontRight) as FrontRight
     max(car.Tyre.Temp.RearLeft) as RearLeft
-    max(car.Tyre.Temp.RearRight) as RearRight WHERE `telemetry-index` span=$span$</query>
+    max(car.Tyre.Temp.RearRight) as RearRight WHERE `telemetry-index` span=1s 
+| tail 999 
+| reverse</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -207,16 +233,15 @@ BY CarName CarClass CarDriveTrain host source
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
         <option name="drilldown">none</option>
-        <option name="height">400</option>
         <option name="numberPrecision">0.0</option>
         <option name="rangeColors">["0x006d9c","0x53a051","0xf8be34","0xdc4e41"]</option>
-        <option name="rangeValues">[75,150,200]</option>
+        <option name="rangeValues">[30,70,100]</option>
         <option name="refresh.display">progressbar</option>
         <option name="showSparkline">1</option>
         <option name="showTrendIndicator">1</option>
         <option name="trellis.enabled">1</option>
         <option name="trellis.scales.shared">1</option>
-        <option name="trellis.size">medium</option>
+        <option name="trellis.size">large</option>
         <option name="trellis.splitBy">_aggregation</option>
         <option name="trendColorInterpretation">standard</option>
         <option name="trendDisplayMode">absolute</option>
@@ -225,13 +250,17 @@ BY CarName CarClass CarDriveTrain host source
         <option name="useColors">1</option>
         <option name="useThousandSeparators">0</option>
       </single>
+    </panel>
+    <panel>
       <single>
         <title>Peak Wheel Slip</title>
         <search>
           <query>| mstats max(car.Tyre.SlipSpeed.FrontLeft) as FrontLeft
     max(car.Tyre.SlipSpeed.FrontRight) as FrontRight
     max(car.Tyre.SlipSpeed.RearLeft) as RearLeft
-    max(car.Tyre.SlipSpeed.RearRight) as RearRight WHERE `telemetry-index` span=$span$</query>
+    max(car.Tyre.SlipSpeed.RearRight) as RearRight WHERE `telemetry-index` span=1s 
+| tail 999 
+| reverse</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -241,22 +270,54 @@ BY CarName CarClass CarDriveTrain host source
         <option name="drilldown">none</option>
         <option name="numberPrecision">0.0</option>
         <option name="rangeColors">["0x53a051","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="rangeValues">[1,2,5]</option>
+        <option name="rangeValues">[5,33,66]</option>
         <option name="refresh.display">progressbar</option>
         <option name="showSparkline">1</option>
         <option name="showTrendIndicator">1</option>
         <option name="trellis.enabled">1</option>
         <option name="trellis.scales.shared">1</option>
-        <option name="trellis.size">medium</option>
+        <option name="trellis.size">large</option>
         <option name="trendColorInterpretation">standard</option>
         <option name="trendDisplayMode">absolute</option>
         <option name="unit">%</option>
         <option name="unitPosition">after</option>
         <option name="useColors">1</option>
         <option name="useThousandSeparators">0</option>
-        <option name="height">400</option>
       </single>
     </panel>
+    <panel>
+      <single>
+        <title>Peak Suspension</title>
+        <search>
+          <query>| mstats max(car.Suspension.Travel.*) as * WHERE `telemetry-index` span=1s
+| tail 999 
+| reverse</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.0</option>
+        <option name="rangeColors">["0x53a051","0x006d9c","0xf8be34","0xdc4e41"]</option>
+        <option name="rangeValues">[25,50,75]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">%</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">1</option>
+        <option name="useThousandSeparators">0</option>
+      </single>
+    </panel>
+  </row>
+  <row>
     <panel>
       <title>Map</title>
       <chart>
@@ -299,7 +360,7 @@ BY CarName CarClass CarDriveTrain host source
         <option name="charting.legend.placement">bottom</option>
         <option name="charting.lineWidth">2</option>
         <option name="charting.seriesColors">[0x3bd100,0x98a000,0xbd6500,0xc40000]</option>
-        <option name="height">400</option>
+        <option name="height">900</option>
         <option name="refresh.display">progressbar</option>
         <option name="trellis.enabled">0</option>
         <option name="trellis.scales.shared">1</option>

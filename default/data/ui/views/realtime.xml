@@ -306,5 +306,16 @@ BY CarName CarClass CarDriveTrain host source
         <option name="trellis.size">medium</option>
       </chart>
     </panel>
+    <panel>
+      <table>
+        <title>VIDEO</title>
+        <search>
+          <query>| makeresults</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
   </row>
 </form>

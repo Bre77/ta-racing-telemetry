@@ -72,7 +72,7 @@
       <table>
         <title>Lap Drilldown</title>
         <search>
-          <query>| mstats latest(car.LapNumber) as lap WHERE `telemetry-index` span=1s
+          <query>| mstats latest(car.LapNumber) as lap WHERE `telemetry-index` span=$span$ chart=true 
 | transaction lap
 | table _time duration lap 
 | where lap!=0
@@ -94,8 +94,7 @@
       <chart>
         <title>Steering</title>
         <search>
-          <query>| mstats prestats=true latest(car.Steering) as Steering where `telemetry-index` span=1s
-| timechart span=1s latest(car.Steering) as Steering
+          <query>| mstats latest(car.Steering) as Steering where `telemetry-index` span=$span$ chart=true 
 | eval Steering = Steering/1.27</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -119,8 +118,7 @@
       <chart>
         <title>Gear</title>
         <search>
-          <query>| mstats prestats=true latest(car.Gear) as Gear WHERE `telemetry-index` span=1s
-| timechart span=$span$ latest(car.Gear) as Gear</query>
+          <query>| mstats latest(car.Gear) as Gear WHERE `telemetry-index` span=$span$ chart=true</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
@@ -128,6 +126,7 @@
         <option name="charting.axisTitleX.visibility">collapsed</option>
         <option name="charting.axisTitleY.visibility">collapsed</option>
         <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">zero</option>
         <option name="charting.chart.showDataLabels">none</option>
         <option name="charting.chart.stackMode">default</option>
         <option name="charting.drilldown">none</option>
@@ -141,8 +140,7 @@
       <chart>
         <title>Inputs</title>
         <search>
-          <query>| mstats prestats=true avg(car.Brake) avg(car.Throttle) avg(car.HandBrake) WHERE `telemetry-index` span=1s
-| timechart span=$span$ avg(car.Brake) as Brake avg(car.Throttle) as Throttle avg(car.HandBrake) as HandBrake
+          <query>| mstats  avg(car.Brake) as Brake avg(car.Throttle) as Throttle avg(car.HandBrake) as HandBrake WHERE `telemetry-index` span=$span$ chart=true 
 | eval Brake=Brake/2.54
 | eval Throttle=Throttle/2.54
 | eval HandBrake=HandBrake/2.54</query>
@@ -193,8 +191,7 @@
       <chart>
         <title>Speed / RPM</title>
         <search>
-          <query>| mstats prestats=true avg(car.Speed) avg(car.Rpm.Current) WHERE `telemetry-index` span=$span$
-| timechart span=$span$ avg(car.Speed) as Speed avg(car.Rpm.Current) as Rpm
+          <query>| mstats avg(car.Speed) as Speed avg(car.Rpm.Current) as Rpm WHERE `telemetry-index` span=$span$ chart=true 
 | eval Speed = Speed*$speed$</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
@@ -223,7 +220,7 @@
           <query>| mstats max(car.Tyre.Temp.FrontLeft) as FrontLeft
     max(car.Tyre.Temp.FrontRight) as FrontRight
     max(car.Tyre.Temp.RearLeft) as RearLeft
-    max(car.Tyre.Temp.RearRight) as RearRight WHERE `telemetry-index` span=1s 
+    max(car.Tyre.Temp.RearRight) as RearRight WHERE `telemetry-index` span=$span$ chart=true 
 | tail 999 
 | reverse</query>
           <earliest>$time.earliest$</earliest>
@@ -235,7 +232,7 @@
         <option name="drilldown">none</option>
         <option name="numberPrecision">0.0</option>
         <option name="rangeColors">["0x006d9c","0x53a051","0xf8be34","0xdc4e41"]</option>
-        <option name="rangeValues">[30,70,100]</option>
+        <option name="rangeValues">[100,200,300]</option>
         <option name="refresh.display">progressbar</option>
         <option name="showSparkline">1</option>
         <option name="showTrendIndicator">1</option>
@@ -258,7 +255,7 @@
           <query>| mstats max(car.Tyre.SlipSpeed.FrontLeft) as FrontLeft
     max(car.Tyre.SlipSpeed.FrontRight) as FrontRight
     max(car.Tyre.SlipSpeed.RearLeft) as RearLeft
-    max(car.Tyre.SlipSpeed.RearRight) as RearRight WHERE `telemetry-index` span=1s 
+    max(car.Tyre.SlipSpeed.RearRight) as RearRight WHERE `telemetry-index` span=$span$ chart=true 
 | tail 999 
 | reverse</query>
           <earliest>$time.earliest$</earliest>
@@ -289,7 +286,7 @@
       <single>
         <title>Peak Suspension</title>
         <search>
-          <query>| mstats max(car.Suspension.Travel.*) as * WHERE `telemetry-index` span=1s
+          <query>| mstats max(car.Suspension.Travel.*) as * WHERE `telemetry-index` span=$span$ chart=true 
 | tail 999 
 | reverse</query>
           <earliest>$time.earliest$</earliest>
@@ -322,7 +319,7 @@
       <title>Map</title>
       <chart>
         <search>
-          <query>| mstats max(car.Speed) as Speed latest(car.Position.X) as X latest(car.Position.Z) as Z WHERE `telemetry-index` span=1s 
+          <query>| mstats max(car.Speed) as Speed latest(car.Position.X) as X latest(car.Position.Z) as Z WHERE `telemetry-index` span=$span$ chart=true 
 | where X!=0 OR Z!=0
 | eval Speed=Speed*$speed$
 | bin Speed start=0 bins=4
